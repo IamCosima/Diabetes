@@ -7,7 +7,7 @@ from rich.prompt import Confirm
 import pyfiglet
 from typing_extensions import Annotated
 import inquirer
-import datetime
+from datetime import datetime, date 
 
 import numpy as np
 import pandas as pd
@@ -16,86 +16,288 @@ import seaborn as sns
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 from joblib import dump,load
-
-type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
-
-
-#looking at the headers of the dataset
-type_2_diabetes_data.head(5)
-
-#looking at all the statistical data from the dataset
-type_2_diabetes_data.describe()
-
-type_2_diabetes_data.info()
-
-#heatmap visulisation to see corrilations
-sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
-
-split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
-    strat_train_set = type_2_diabetes_data.loc[train_indices]
-    strat_test_set = type_2_diabetes_data.loc[test_indices]
-
-#Stratified test set    
-strat_test_set
-#Stratified train set   
-strat_train_set
-
-strat_train_set.info()
+from sklearn.metrics import accuracy_score
 
 
-X = strat_train_set.drop(['Diabetes_012'], axis=1)
-y = strat_train_set[['Diabetes_012']]
-scaler = StandardScaler()
-X_data = scaler.fit_transform(X)
-Y_data = y.to_numpy()
-#random forest set up
-clf = RandomForestClassifier()
 
-param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+def randomforest():
+    type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
 
-grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
-grid_search.fit(X_data,Y_data)
+    #looking at the headers of the dataset
+    type_2_diabetes_data.head(5)
 
-final_clf = grid_search.best_estimator_
+    #looking at all the statistical data from the dataset
+    type_2_diabetes_data.describe()
+
+    type_2_diabetes_data.info()
+
+    #heatmap visulisation to see corrilations
+    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+
+    split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+        strat_train_set = type_2_diabetes_data.loc[train_indices]
+        strat_test_set = type_2_diabetes_data.loc[test_indices]
+
+    #Stratified test set    
+    strat_test_set
+    #Stratified train set   
+    strat_train_set
+
+    strat_train_set.info()
 
 
-X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
-Y_test = strat_test_set[['Diabetes_012']]
-scaler = StandardScaler()
-X_data_test = scaler.fit_transform(X_test)
-Y_data_test = Y_test.to_numpy()
+    X = strat_train_set.drop(['Diabetes_012'], axis=1)
+    y = strat_train_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data = scaler.fit_transform(X)
+    Y_data = y.to_numpy()
+    #random forest set up
+    clf = RandomForestClassifier()
 
-final_clf.score(X_data_test,Y_data_test)
+    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
 
-#exporting file
-dump(final_clf,filename="clf_random_forest_model_First.joblib")
+    grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+    grid_search.fit(X_data,Y_data)
 
-#importing file
-loaded_model = load(filename="clf_random_forest_model_First.joblib")\
+    final_clf = grid_search.best_estimator_
+
+
+    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
+    Y_test = strat_test_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data_test = scaler.fit_transform(X_test)
+    Y_data_test = Y_test.to_numpy()
+
+    final_clf.score(X_data_test,Y_data_test)
+
+    #exporting file
+    dump(final_clf,filename="clf_random_forest_model_First.joblib")
+
+    #importing file
+    loaded_model = load(filename="clf_random_forest_model_First.joblib")\
+        
+    joblib_y_preds = loaded_model.predict(X_test)
+    loaded_model.score(X_data_test,Y_data_test)
+
+
+    final_data = type_2_diabetes_data
+
+    X_final = final_data(['Diabetes_012'], axis=1)
+    Y_final = final_data[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data_test = scaler.fit_transform(X_final)
+    Y_data_test = y.to_numpy(Y_final)
+
+    prod_clf = RandomForestClassifier()
+
+    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+
+    grid_search = GridSearchCV(prod_clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+    grid_search.fit(X_final,Y_final)
+
+    prod_final_clf = grid_search.best_estimator_
+
+def supportvector():
+#Suport vector model code
+    type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
+
+    #looking at the headers of the dataset
+    type_2_diabetes_data.head(5)
+
+    #looking at all the statistical data from the dataset
+    type_2_diabetes_data.describe()
+
+    type_2_diabetes_data.info()
+
+    #heatmap visulisation to see corrilations
+    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+
+    split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+        strat_train_set = type_2_diabetes_data.loc[train_indices]
+        strat_test_set = type_2_diabetes_data.loc[test_indices]
+
+    #Stratified test set    
+    strat_test_set
+    #Stratified train set   
+    strat_train_set
+
+    strat_train_set.info()
+
+
+    X_train = strat_train_set.drop(['Diabetes_012'], axis=1)
+    y_train = strat_train_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data = scaler.fit_transform(X_train)
+    Y_data = y_train.to_numpy()
+
+    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
+    Y_test = strat_test_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data_test = scaler.fit_transform(X_test)
+    Y_data_test = Y_test.to_numpy()
+
+    clf_Svm = svm.SVC(kernel='linear')
+    clf_Svm.fit(X_train,y_train)
     
-joblib_y_preds = loaded_model.predict(X_test)
-loaded_model.score(X_data_test,Y_data_test)
+    dump(clf_Svm,filename="clf_random_Support_Vector_model_First.joblib")
+    
+    X_train_predict = clf_Svm.predict(X_train)
+    training_accuracy = accuracy_score(X_train_predict,y_train)
+    print('The accuracy of training data is: ',training_accuracy)
+    
+    
+    X_test_predict = clf_Svm.predict(X_test)
+    test_accuracy = accuracy_score(X_test_predict,Y_test)
+    print('The accuracy of testing data is: ',test_accuracy)
+    
 
 
-final_data = type_2_diabetes_data
+def calc_age(dob):
+    born =datetime.strptime(dob,"%d-%m-%Y").date()
+    now = date.today()
+    age = now.year - born.year
+    return age
 
-X_final = final_data(['Diabetes_012'], axis=1)
-Y_final = final_data[['Diabetes_012']]
-scaler = StandardScaler()
-X_data_test = scaler.fit_transform(X_final)
-Y_data_test = y.to_numpy(Y_final)
+def calc_blood_pressure(bp):
+    bp = bp.split('/')
+    systolic = bp[0]
+    diastolic = bp[1]
+    
+    if systolic >= 140 or diastolic >= 90:
+        result = 1
+    else:
+        result = 2
+    
+    return result
 
-prod_clf = RandomForestClassifier()
+""" 
+Questionnaire quick understanding key of values before full clean
+Diabetes = 1 = no yes = 2
+Gender    =  1 = Male yes = Female 3 = Other       
+Family-History = 1 = no yes = 2   
+Smoking   = 1 = no yes = 2
+Alcohol  = 1 = no yes = 2
+Dietry_Habits = 1 = no yes = 2 
+Fruit   = 1-5 values ranging from 1 being never to 5 being extremely often
+Vegetables  = 1-5 values ranging from 1 being never to 5 being extremely often
+Fast_Food  = 1-5 values ranging from 1 being never to 5 being extremely often
+Sweets  =  1-5 values ranging from 1 being never to 5 being extremely often
+Sleep=  1 = under 4
+        2 = 4-6
+        3 = 6-8
+        4 = 8-10
+        5 = 10+
+Physical_Activity =  1-5 values ranging from 1 being low to 5 being extremely High 
+Energy_Levels  = 1-5 values ranging from 1 being Low to 5 being extremely High
+Water    =  1-5 values ranging from 1 being never to 5 being extremely often
+Juice  =  1-5 values ranging from 1 being never to 5 being extremely often
+Soda    =   1-5 values ranging from 1 being never to 5 being extremely often         
+Height   =    Input from the paticipant in cm      
+Weight    =   Input from the paticipant in kg      
+Waist      =   Input from the paticipant in cm     
+Blood_pressure =  Input from the paticipant in 120/90
+Glucose    = Input from the paticipant in 5.0
+Cholesterol = Input from the paticipant in 4.0                                                      
+"""
 
-param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+def shift_zero_indexing(one_based_system):
+    zero_based_system = one_based_system - 1
+    return
 
-grid_search = GridSearchCV(prod_clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
-grid_search.fit(X_final,Y_final)
+def mydataset():
+    type_2_diabetes_data = pd.read_csv('Not_Cleaned_data_project_38184_2024_12_24.csv')
 
-prod_final_clf = grid_search.best_estimator_
+    #Cleaning the dataset for use e.g cacl age , numbering system change
+    #change numbering system to zero based
+    type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing)
+    
+    #calc values
+    type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
+    type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
+
+
+
+    #looking at the headers of the dataset
+    type_2_diabetes_data.head(5)
+
+    #looking at all the statistical data from the dataset
+    type_2_diabetes_data.describe()
+
+    type_2_diabetes_data.info()
+    
+   
+    
+    #heatmap visulisation to see corrilations
+    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+
+    split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+        strat_train_set = type_2_diabetes_data.loc[train_indices]
+        strat_test_set = type_2_diabetes_data.loc[test_indices]
+
+    #Stratified test set    
+    strat_test_set
+    #Stratified train set   
+    strat_train_set
+
+    strat_train_set.info()
+
+
+    X = strat_train_set.drop(['Diabetes_012'], axis=1)
+    y = strat_train_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data = scaler.fit_transform(X)
+    Y_data = y.to_numpy()
+    #random forest set up
+    clf = RandomForestClassifier()
+
+    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+
+    grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+    grid_search.fit(X_data,Y_data)
+
+    final_clf = grid_search.best_estimator_
+
+
+    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
+    Y_test = strat_test_set[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data_test = scaler.fit_transform(X_test)
+    Y_data_test = Y_test.to_numpy()
+
+    final_clf.score(X_data_test,Y_data_test)
+
+    #exporting file
+    dump(final_clf,filename="clf_random_forest_model_First.joblib")
+
+    #importing file
+    loaded_model = load(filename="clf_random_forest_model_First.joblib")\
+        
+    joblib_y_preds = loaded_model.predict(X_test)
+    loaded_model.score(X_data_test,Y_data_test)
+
+
+    final_data = type_2_diabetes_data
+
+    X_final = final_data(['Diabetes_012'], axis=1)
+    Y_final = final_data[['Diabetes_012']]
+    scaler = StandardScaler()
+    X_data_test = scaler.fit_transform(X_final)
+    Y_data_test = y.to_numpy(Y_final)
+
+    prod_clf = RandomForestClassifier()
+
+    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+
+    grid_search = GridSearchCV(prod_clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+    grid_search.fit(X_final,Y_final)
+
+    prod_final_clf = grid_search.best_estimator_
 
 
 
