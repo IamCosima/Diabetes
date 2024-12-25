@@ -157,29 +157,14 @@ def supportvector():
     
 
 
-def calc_age(dob):
-    born =datetime.strptime(dob,"%d-%m-%Y").date()
-    now = date.today()
-    age = now.year - born.year
-    return age
 
-def calc_blood_pressure(bp):
-    bp = bp.split('/')
-    systolic = bp[0]
-    diastolic = bp[1]
-    
-    if systolic >= 140 or diastolic >= 90:
-        result = 1
-    else:
-        result = 2
-    
-    return result
 
 """ 
 Questionnaire quick understanding key of values before full clean
 Diabetes = 1 = no yes = 2
+Birthdate = Input from the user 24-12-2024
 Gender    =  1 = Male yes = Female 3 = Other       
-Family-History = 1 = no yes = 2   
+Family_History = 1 = no yes = 2   
 Smoking   = 1 = no yes = 2
 Alcohol  = 1 = no yes = 2
 Dietry_Habits = 1 = no yes = 2 
@@ -205,9 +190,32 @@ Glucose    = Input from the paticipant in 5.0
 Cholesterol = Input from the paticipant in 4.0                                                      
 """
 
+def calc_age(dob):
+    born =datetime.strptime(dob,"%d-%m-%Y").date()
+    now = date.today()
+    age = now.year - born.year
+    return age
+
+def calc_blood_pressure(bp):
+    bp = bp.split()
+    #print(bp)
+    if bp[0] == 'nan':
+        return None
+    else:
+        systolic = bp[0]
+        diastolic = bp[1]
+        if int(systolic) >= 140 or int(diastolic) >= 90:
+            result = 1
+        else:
+            result = 2
+    
+    return result
+
+
+
 def shift_zero_indexing(one_based_system):
     zero_based_system = one_based_system - 1
-    return
+    return zero_based_system
 
 def mydataset():
     type_2_diabetes_data = pd.read_csv('Not_Cleaned_data_project_38184_2024_12_24.csv')
@@ -216,9 +224,42 @@ def mydataset():
     #change numbering system to zero based
     type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing)
     
+    type_2_diabetes_data['Gender'] = type_2_diabetes_data['Gender'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Family_History'] = type_2_diabetes_data['Family_History'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Smoking'] = type_2_diabetes_data['Smoking'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Alcohol'] = type_2_diabetes_data['Alcohol'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Dietry_Habits'] = type_2_diabetes_data['Dietry_Habits'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Fruit'] = type_2_diabetes_data['Fruit'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Vegetables'] = type_2_diabetes_data['Vegetables'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Fast_Food'] = type_2_diabetes_data['Fast_Food'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sweets'] = type_2_diabetes_data['Sweets'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sleep'] = type_2_diabetes_data['Sleep'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Physical_Activity'] = type_2_diabetes_data['Physical_Activity'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Energy_Levels'] = type_2_diabetes_data['Energy_Levels'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Water'] = type_2_diabetes_data['Water'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Juice'] = type_2_diabetes_data['Juice'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Soda'] = type_2_diabetes_data['Soda'].apply(shift_zero_indexing)
     #calc values
     type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
+    
+    type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
+    type_2_diabetes_data['Blood_Pressure']
     type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
 
 
 
@@ -236,7 +277,7 @@ def mydataset():
     sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
 
     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes","Gender","Birthdate"]]):
         strat_train_set = type_2_diabetes_data.loc[train_indices]
         strat_test_set = type_2_diabetes_data.loc[test_indices]
 
@@ -248,8 +289,8 @@ def mydataset():
     strat_train_set.info()
 
 
-    X = strat_train_set.drop(['Diabetes_012'], axis=1)
-    y = strat_train_set[['Diabetes_012']]
+    X = strat_train_set.drop(['Diabetes'], axis=1)
+    y = strat_train_set[['Diabetes']]
     scaler = StandardScaler()
     X_data = scaler.fit_transform(X)
     Y_data = y.to_numpy()
@@ -264,8 +305,8 @@ def mydataset():
     final_clf = grid_search.best_estimator_
 
 
-    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
-    Y_test = strat_test_set[['Diabetes_012']]
+    X_test = strat_test_set.drop(['Diabetes'], axis=1)
+    Y_test = strat_test_set[['Diabetes']]
     scaler = StandardScaler()
     X_data_test = scaler.fit_transform(X_test)
     Y_data_test = Y_test.to_numpy()
@@ -284,8 +325,8 @@ def mydataset():
 
     final_data = type_2_diabetes_data
 
-    X_final = final_data(['Diabetes_012'], axis=1)
-    Y_final = final_data[['Diabetes_012']]
+    X_final = final_data(['Diabetes'], axis=1)
+    Y_final = final_data[['Diabetes']]
     scaler = StandardScaler()
     X_data_test = scaler.fit_transform(X_final)
     Y_data_test = y.to_numpy(Y_final)
