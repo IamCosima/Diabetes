@@ -20,6 +20,9 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 from joblib import dump,load
 from sklearn.metrics import accuracy_score
+from sklearn.base import BaseEstimator,TransformerMixin
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
 
 
 
@@ -197,7 +200,7 @@ def calc_age(dob):
     return age
 
 def calc_blood_pressure(bp):
-    bp = bp.split()
+    bp = bp.split("/")
     #print(bp)
     if bp[0] == 'nan':
         return None
@@ -212,10 +215,49 @@ def calc_blood_pressure(bp):
     return result
 
 
-
 def shift_zero_indexing(one_based_system):
     zero_based_system = one_based_system - 1
     return zero_based_system
+
+class Waist_Imputer (BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        imputer = SimpleImputer(strategy="mean")
+        X['Waist'] = imputer.fit_transform(X[['Waist']])
+        return X
+
+class Blood_pressure_Imputer (BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        imputer = SimpleImputer(strategy="mean")
+        X['Blood_Pressure'] = imputer.fit_transform(X[['Blood_Pressure']])
+        return X
+
+class Glucose_Imputer (BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        imputer = SimpleImputer(strategy="mean")
+        X['Glucose'] = imputer.fit_transform(X[['Glucose']])
+        return X
+
+class Cholestrol_Imputer (BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        imputer = SimpleImputer(strategy="mean")
+        X['Cholesterol'] = imputer.fit_transform(X[['Cholesterol']])
+        return X
+
+
+
+
 
 def mydataset():
     type_2_diabetes_data = pd.read_csv('Not_Cleaned_data_project_38184_2024_12_24.csv')
@@ -259,10 +301,9 @@ def mydataset():
     type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
     type_2_diabetes_data['Blood_Pressure']
     type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
+    
     #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
-
-
-
+    
     #looking at the headers of the dataset
     type_2_diabetes_data.head(5)
 
@@ -271,13 +312,38 @@ def mydataset():
 
     type_2_diabetes_data.info()
     
-   
-    
+   #estimators need to fill in values for waist,blood pressure, Glucose and cholestrol
+    #   Column             Non-Null Count  Dtype  
+    """---  ------             --------------  -----  
+    0   Diabetes           53 non-null     int64  
+    1   Birthdate          53 non-null     int64  
+    2   Gender             53 non-null     int64  
+    3   Family_History     53 non-null     int64  
+    4   Smoking            53 non-null     int64  
+    5   Alcohol            53 non-null     int64  
+    6   Dietry_Habits      53 non-null     int64  
+    7   Fruit              53 non-null     int64  
+    8   Vegetables         53 non-null     int64  
+    9   Fast_Food          53 non-null     int64  
+    10  Sweets             53 non-null     int64  
+    11  Sleep              53 non-null     int64  
+    12  Physical_Activity  53 non-null     int64  
+    13  Energy_Levels      53 non-null     int64  
+    14  Water              53 non-null     int64  
+    15  Juice              53 non-null     int64  
+    16  Soda               53 non-null     int64  
+    17  Height             53 non-null     int64  
+    18  Weight             53 non-null     int64  
+    19  Waist              50 non-null     float64
+    20  Blood_Pressure     26 non-null     float64
+    21  Glucose            12 non-null     float64
+    22  Cholesterol        9 non-null      float64 """
+      
     #heatmap visulisation to see corrilations
     sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
 
     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes","Gender","Birthdate"]]):
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes","Family_History"]]):
         strat_train_set = type_2_diabetes_data.loc[train_indices]
         strat_test_set = type_2_diabetes_data.loc[test_indices]
 
@@ -286,6 +352,15 @@ def mydataset():
     #Stratified train set   
     strat_train_set
 
+    strat_train_set.info()
+    
+    #pipeline for adding the missing values
+    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer()),
+                         ("Blood_pressure_Imputer",Blood_pressure_Imputer()),
+                         ("Glucose_Imputer",Glucose_Imputer()),
+                         ("Cholestrol_Imputer",Cholestrol_Imputer())])
+
+    strat_train_set = pipeline.fit_transform(strat_train_set)
     strat_train_set.info()
 
 
@@ -302,6 +377,9 @@ def mydataset():
     grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
     grid_search.fit(X_data,Y_data)
 
+
+    #display the CLF
+
     final_clf = grid_search.best_estimator_
 
 
@@ -314,22 +392,22 @@ def mydataset():
     final_clf.score(X_data_test,Y_data_test)
 
     #exporting file
-    dump(final_clf,filename="clf_random_forest_model_First.joblib")
+    dump(final_clf,filename="clf_random_forest_model_QuestionnaireDataset.joblib")
 
     #importing file
-    loaded_model = load(filename="clf_random_forest_model_First.joblib")\
+    loaded_model = load(filename="clf_random_forest_model_First.joblib")
         
     joblib_y_preds = loaded_model.predict(X_test)
     loaded_model.score(X_data_test,Y_data_test)
 
 
-    final_data = type_2_diabetes_data
+    final_data = pipeline.fit_transform(type_2_diabetes_data)
 
-    X_final = final_data(['Diabetes'], axis=1)
+    X_final = final_data.drop(['Diabetes'], axis=1)
     Y_final = final_data[['Diabetes']]
     scaler = StandardScaler()
     X_data_test = scaler.fit_transform(X_final)
-    Y_data_test = y.to_numpy(Y_final)
+    Y_data_test = y.to_numpy()
 
     prod_clf = RandomForestClassifier()
 
@@ -340,7 +418,61 @@ def mydataset():
 
     prod_final_clf = grid_search.best_estimator_
 
+    
+    
+    test_data_end = pd.read_csv('test.csv')
 
+    #Cleaning the dataset for use e.g cacl age , numbering system change
+    #change numbering system to zero based
+    
+    test_data_end['Gender'] = test_data_end['Gender'].apply(shift_zero_indexing)
+    
+    test_data_end['Family_History'] = test_data_end['Family_History'].apply(shift_zero_indexing)
+    
+    test_data_end['Smoking'] = test_data_end['Smoking'].apply(shift_zero_indexing)
+    
+    test_data_end['Alcohol'] = test_data_end['Alcohol'].apply(shift_zero_indexing)
+    
+    test_data_end['Dietry_Habits'] = test_data_end['Dietry_Habits'].apply(shift_zero_indexing)
+    
+    test_data_end['Fruit'] = test_data_end['Fruit'].apply(shift_zero_indexing)
+    
+    test_data_end['Vegetables'] = test_data_end['Vegetables'].apply(shift_zero_indexing)
+    
+    test_data_end['Fast_Food'] = test_data_end['Fast_Food'].apply(shift_zero_indexing)
+    
+    test_data_end['Sweets'] = test_data_end['Sweets'].apply(shift_zero_indexing)
+    
+    test_data_end['Sleep'] = test_data_end['Sleep'].apply(shift_zero_indexing)
+    
+    test_data_end['Physical_Activity'] = test_data_end['Physical_Activity'].apply(shift_zero_indexing)
+    
+    test_data_end['Energy_Levels'] = test_data_end['Energy_Levels'].apply(shift_zero_indexing)
+    
+    test_data_end['Water'] = test_data_end['Water'].apply(shift_zero_indexing)
+    
+    test_data_end['Juice'] = test_data_end['Juice'].apply(shift_zero_indexing)
+    
+    test_data_end['Soda'] = test_data_end['Soda'].apply(shift_zero_indexing)
+    #calc values
+    test_data_end['Birthdate'] = test_data_end['Birthdate'].apply(calc_age)
+    
+    test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].astype(str)
+    test_data_end['Blood_Pressure']
+    test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].apply(calc_blood_pressure)
+    
+    Final_test_data_end = pipeline.fit_transform(test_data_end)
+    
+    X_test_data_end = Final_test_data_end
+    scaler_test_data_end = StandardScaler()
+    X_test_data_end = scaler_test_data_end.fit_transform(X_test_data_end)
+    
+    prediction = prod_final_clf.predict(X_test_data_end)
+    prediction
+    
+    
+    
+    
 
 console = Console()
 app = typer.Typer()
