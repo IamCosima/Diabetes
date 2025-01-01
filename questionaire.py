@@ -151,6 +151,9 @@ def create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,
         with open(filename, append_write, newline='') as csvfile:
             questionnaire = csv.writer(csvfile)
             questionnaire.writerows(questionnaire_data_header_inc)
+            
+            
+    return filename
     
         
     
@@ -181,6 +184,28 @@ def create_csv_test(birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,
     blood_pressure = 0
     glucose = 0
     Cholesterol = 0
+    filename = "datasets/questionnaire_user_data.csv"
+    
+    
+    questionnaire_data_header_inc = [
+                        ["Birthdate","Gender","Family_History","Smoking","Alcohol","Dietry_Habits","Fruit","Vegetables","Fast_Food","Sweets","Sleep","Physical_Activity","Energy_Levels","Water","Juice","Soda","Height","Weight","Waist","Blood_Pressure","Glucose","Cholesterol"],
+                        [birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist,blood_pressure,glucose,Cholesterol]
+                        ]
+    questionnaire_data = [[birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist,blood_pressure,glucose,Cholesterol]]
+    if os.path.exists(filename):
+        append_write = 'a' # append if already exists
+        
+        with open(filename, append_write, newline='') as csvfile:
+            questionnaire = csv.writer(csvfile)
+            questionnaire.writerows(questionnaire_data)
+    else:
+        append_write = 'w' # make a new file if not
+        with open(filename, append_write, newline='') as csvfile:
+            questionnaire = csv.writer(csvfile)
+            questionnaire.writerows(questionnaire_data_header_inc)
+            
+            
+    return filename
 
 def questionnaire_train():
     Title = 'Type 2 Diabeters Risk Assesment Questionaire'
@@ -194,7 +219,7 @@ def questionnaire_train():
     #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
     diet = Diet_to_numerical(inquirer.prompt(Diet))
-    fruit = Prompt.ask("On a scale of 1-15 how much do you eat 🍎 fruit")
+    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit")
     vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables")
     fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food")
     sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts")
@@ -208,9 +233,8 @@ def questionnaire_train():
     weight = Prompt.ask("Please Enter your ⚖️ Weight in KG")
     waist = Prompt.ask("Please Enter your 📏 Waist Circumference in cm")
     
-    create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
-    predict.mydataset_RF()
-    
+    filename = create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
+    predict.mydataset_RF(filename)
     #Blood pressure,glucose and cholestrol were removed
     #blood_pressure = Prompt.ask("19. Please input your ⚖️ blood presure result")
     #glucose = Prompt.ask("20. Please input your ⚖️ glucose result")
@@ -223,15 +247,16 @@ def questionnaire_train():
 def questionnaire_test():
     Title = 'Type 2 Diabeters Risk Assesment Questionaire'
     print(pyfiglet.figlet_format(Title))
+    Diabetes = confirm_to_numerical(Confirm.ask("Do you have diabetes?"))
     birthdate = Prompt.ask("Please Enter your 🎂 Birthdate in Format DD-MM-YY")
     gender = gender_to_numerical(inquirer.prompt(Gender))
-    print(gender)
+    #print(gender)
     family = confirm_to_numerical(Confirm.ask("Do you have any immediate family that has diabetes?"))
     smoker = confirm_to_numerical(Confirm.ask("Do you smoke 🚬 regularly?"))
-    print(smoker)
+    #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
     diet = Diet_to_numerical(inquirer.prompt(Diet))
-    fruit = Prompt.ask("On a scale of 1-15 how much do you eat 🍎 fruit")
+    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit")
     vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables")
     fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food")
     sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts")
@@ -244,15 +269,29 @@ def questionnaire_test():
     height = Prompt.ask("Please Enter your 📏 Height in cm")
     weight = Prompt.ask("Please Enter your ⚖️ Weight in KG")
     waist = Prompt.ask("Please Enter your 📏 Waist Circumference in cm")
+    
+    filename = create_csv_test(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
+    predict.mydataset_RF(filename)
     #Blood pressure,glucose and cholestrol were removed
     #blood_pressure = Prompt.ask("19. Please input your ⚖️ blood presure result")
     #glucose = Prompt.ask("20. Please input your ⚖️ glucose result")
     #Cholesterol = Prompt.ask("21. Please input your Cholesterol result")
+    return
 
 
 
 #Questionaire
 @app.command("start")
+def questionaire_Create():
+    """
+    Start the questionaire
+    """
+    questionnaire_test()
+    
+    #add recomendation 
+    #add results from questionaire
+    
+@app.command("Input")
 def questionaire_Create():
     """
     Start the questionaire
