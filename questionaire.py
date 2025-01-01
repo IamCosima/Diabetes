@@ -36,6 +36,15 @@ Sleep = [
     ),
 ] 
 
+Model = [
+    inquirer.List(
+        "Model",
+        message="Which model would you like to choose?",
+        choices=["Decision trees", "Random forests"],
+    ),
+] 
+
+
 """#   Column             Non-Null Count  Dtype  *Generated
 ---  ------             --------------  -----  
  0   Diabetes           53 non-null     int64  
@@ -301,3 +310,11 @@ def questionaire_Create():
     #add recomendation 
     #add results from questionaire
     
+@app.command("Model")
+def questionaire_Create():
+    """
+    Choose model type
+    """
+    Title = 'Choose model type'
+    print(pyfiglet.figlet_format(Title))
+    model = inquirer.prompt(Model)
