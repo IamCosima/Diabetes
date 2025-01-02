@@ -2,7 +2,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
-from rich.prompt import Prompt
+from rich.prompt import Prompt,IntPrompt
 from rich.prompt import Confirm
 import pyfiglet
 from typing_extensions import Annotated
@@ -93,7 +93,6 @@ def Diet_to_numerical(diet):
     return numerical
 
 def Sleep_to_numerical(sleep): 
-    choices=["Under 4 hours", "4-6 hours","6-8 hours","8-10 hours","10+"],
     if sleep.get("Sleep") == "Under 4 hours":
         numerical = 1
     elif sleep.get("Sleep") == "4-6 hours":
@@ -113,6 +112,13 @@ def confirm_to_numerical(zero_based_system):
         zero_based_system = 1  
     return zero_based_system
     
+def loop_1_to_5(num):
+    while True:
+        if num >= 1 and num <= 10:
+            break
+        print(":pile_of_poo: [prompt.invalid]Number must be between 1 and 10")
+
+
     
     
 def create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist):
@@ -141,7 +147,7 @@ def create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,
     blood_pressure = 0
     glucose = 0
     Cholesterol = 0
-    filename = "datasets/questionnaire_train_data.csv"
+    filename = "datasets/Not_Cleaned_data_project_38184_2024_12_24.csv"
     
     
     questionnaire_data_header_inc = [
@@ -165,10 +171,6 @@ def create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,
     return filename
     
         
-    
-    
- 
-
 def create_csv_test(birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist):
     csv_headers = "Birthdate,Gender,Family_History,Smoking,Alcohol,Dietry_Habits,Fruit,Vegetables,Fast_Food,Sweets,Sleep,Physical_Activity,Energy_Levels,Water,Juice,Soda,Height,Weight,Waist,Blood_Pressure,Glucose,Cholesterol"
     birthdate = birthdate
@@ -228,22 +230,22 @@ def questionnaire_train():
     #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
     diet = Diet_to_numerical(inquirer.prompt(Diet))
-    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit")
-    vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables")
-    fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food")
-    sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts")
+    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit",choices=["1","2","3","4","5"])
+    vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables",choices=["1","2","3","4","5"])
+    fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food",choices=["1","2","3","4","5"])
+    sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts",choices=["1","2","3","4","5"])
     sleep = Sleep_to_numerical(inquirer.prompt(Sleep))
-    activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you")
-    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day")
-    water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day")
-    juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day")
-    soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day")
+    activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you",choices=["1","2","3","4","5"])
+    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day",choices=["1","2","3","4","5"])
+    water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day",choices=["1","2","3","4","5"])
+    juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day",choices=["1","2","3","4","5"])
+    soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day",choices=["1","2","3","4","5"])
     height = Prompt.ask("Please Enter your 📏 Height in cm")
     weight = Prompt.ask("Please Enter your ⚖️ Weight in KG")
     waist = Prompt.ask("Please Enter your 📏 Waist Circumference in cm")
     
-    filename = create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
-    predict.mydataset_RF(filename)
+    create_csv_train(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
+    #predict.mydataset_RF(filename)
     #Blood pressure,glucose and cholestrol were removed
     #blood_pressure = Prompt.ask("19. Please input your ⚖️ blood presure result")
     #glucose = Prompt.ask("20. Please input your ⚖️ glucose result")
@@ -256,7 +258,7 @@ def questionnaire_train():
 def questionnaire_test():
     Title = 'Type 2 Diabeters Risk Assesment Questionaire'
     print(pyfiglet.figlet_format(Title))
-    Diabetes = confirm_to_numerical(Confirm.ask("Do you have diabetes?"))
+    #Diabetes = confirm_to_numerical(Confirm.ask("Do you have diabetes?"))
     birthdate = Prompt.ask("Please Enter your 🎂 Birthdate in Format DD-MM-YY")
     gender = gender_to_numerical(inquirer.prompt(Gender))
     #print(gender)
@@ -265,22 +267,31 @@ def questionnaire_test():
     #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
     diet = Diet_to_numerical(inquirer.prompt(Diet))
-    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit")
-    vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables")
-    fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food")
-    sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts")
+    fruit = Prompt.ask("On a scale of 1-5 how much do you eat 🍎 fruit",choices=["1","2","3","4","5"])
+    vegtables = Prompt.ask("On a scale of 1-5 how much do you eat 🥕 vegtables",choices=["1","2","3","4","5"])
+    fast_food = Prompt.ask("On a scale of 1-5 how much do you eat out E.g. 🍔 Fast Food",choices=["1","2","3","4","5"])
+    sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts",choices=["1","2","3","4","5"])
     sleep = Sleep_to_numerical(inquirer.prompt(Sleep))
-    activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you")
-    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day")
-    water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day")
-    juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day")
-    soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day")
+    activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you",choices=["1","2","3","4","5"])
+    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day",choices=["1","2","3","4","5"])
+    water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day",choices=["1","2","3","4","5"])
+    juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day",choices=["1","2","3","4","5"])
+    soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day",choices=["1","2","3","4","5"])
     height = Prompt.ask("Please Enter your 📏 Height in cm")
     weight = Prompt.ask("Please Enter your ⚖️ Weight in KG")
     waist = Prompt.ask("Please Enter your 📏 Waist Circumference in cm")
     
-    filename = create_csv_test(Diabetes,birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
-    predict.mydataset_RF(filename)
+    filename = create_csv_test(birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,fast_food,sweets,sleep,activity,energy_levels,water,juice,soda,height,weight,waist)
+    
+    model = inquirer.prompt(Model)
+    
+    if model.get("Model") == "Decision trees":
+        predict.mydataset_RF_Prediction(filename)
+    elif model.get("Model") == "Random forests":
+        predict.mydataset_SVM_Prediction(filename)
+    else:
+        print("Error")
+    
     #Blood pressure,glucose and cholestrol were removed
     #blood_pressure = Prompt.ask("19. Please input your ⚖️ blood presure result")
     #glucose = Prompt.ask("20. Please input your ⚖️ glucose result")
@@ -293,7 +304,7 @@ def questionnaire_test():
 @app.command("start")
 def questionaire_Create():
     """
-    Start the questionaire
+    Start the questionaire to test Diabetes Risk
     """
     questionnaire_test()
     
@@ -303,7 +314,7 @@ def questionaire_Create():
 @app.command("Input")
 def questionaire_Create():
     """
-    Start the questionaire
+    Gather Data for the Models
     """
     questionnaire_train()
     
