@@ -11,7 +11,7 @@ from datetime import datetime, date
 
 import numpy as np
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
@@ -25,143 +25,10 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from eli5 import show_weights
 from eli5 import show_prediction
-
-
-
-def randomforest():
-    type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
-
-    #looking at the headers of the dataset
-    type_2_diabetes_data.head(5)
-
-    #looking at all the statistical data from the dataset
-    type_2_diabetes_data.describe()
-
-    type_2_diabetes_data.info()
-
-    #heatmap visulisation to see corrilations
-    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
-
-    split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
-        strat_train_set = type_2_diabetes_data.loc[train_indices]
-        strat_test_set = type_2_diabetes_data.loc[test_indices]
-
-    #Stratified test set    
-    strat_test_set
-    #Stratified train set   
-    strat_train_set
-
-    strat_train_set.info()
-
-
-    X = strat_train_set.drop(['Diabetes_012'], axis=1)
-    y = strat_train_set[['Diabetes_012']]
-    scaler = StandardScaler()
-    X_data = scaler.fit_transform(X)
-    Y_data = y.to_numpy()
-    #random forest set up
-    clf = RandomForestClassifier()
-
-    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
-    grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
-    grid_search.fit(X_data,Y_data)
-
-    final_clf = grid_search.best_estimator_
-
-
-    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
-    Y_test = strat_test_set[['Diabetes_012']]
-    scaler = StandardScaler()
-    X_data_test = scaler.fit_transform(X_test)
-    Y_data_test = Y_test.to_numpy()
-
-    final_clf.score(X_data_test,Y_data_test)
-
-    #exporting file
-    dump(final_clf,filename="clf_random_forest_model_First.joblib")
-
-    #importing file
-    loaded_model = load(filename="clf_random_forest_model_First.joblib")\
-        
-    joblib_y_preds = loaded_model.predict(X_test)
-    loaded_model.score(X_data_test,Y_data_test)
-
-
-    final_data = type_2_diabetes_data
-
-    X_final = final_data(['Diabetes_012'], axis=1)
-    Y_final = final_data[['Diabetes_012']]
-    scaler = StandardScaler()
-    X_data_test = scaler.fit_transform(X_final)
-    Y_data_test = y.to_numpy(Y_final)
-
-    prod_clf = RandomForestClassifier()
-
-    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
-    grid_search = GridSearchCV(prod_clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
-    grid_search.fit(X_final,Y_final)
-
-    prod_final_clf = grid_search.best_estimator_
-
-def supportvector():
-#Suport vector model code
-    type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
-
-    #looking at the headers of the dataset
-    type_2_diabetes_data.head(5)
-
-    #looking at all the statistical data from the dataset
-    type_2_diabetes_data.describe()
-
-    type_2_diabetes_data.info()
-
-    #heatmap visulisation to see corrilations
-    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
-
-    split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
-        strat_train_set = type_2_diabetes_data.loc[train_indices]
-        strat_test_set = type_2_diabetes_data.loc[test_indices]
-
-    #Stratified test set    
-    strat_test_set
-    #Stratified train set   
-    strat_train_set
-
-    strat_train_set.info()
-
-
-    X_train = strat_train_set.drop(['Diabetes_012'], axis=1)
-    y_train = strat_train_set[['Diabetes_012']]
-    scaler = StandardScaler()
-    X_data = scaler.fit_transform(X_train)
-    Y_data = y_train.to_numpy()
-
-    X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
-    Y_test = strat_test_set[['Diabetes_012']]
-    scaler = StandardScaler()
-    X_data_test = scaler.fit_transform(X_test)
-    Y_data_test = Y_test.to_numpy()
-
-    clf_Svm = svm.SVC(kernel='linear')
-    clf_Svm.fit(X_train,y_train)
+from sklearn.inspection import permutation_importance
+import time
+from rfpimp import *
     
-    dump(clf_Svm,filename="clf_random_Support_Vector_model_First.joblib")
-    
-    X_train_predict = clf_Svm.predict(X_train)
-    training_accuracy = accuracy_score(X_train_predict,y_train)
-    print('The accuracy of training data is: ',training_accuracy)
-    
-    
-    X_test_predict = clf_Svm.predict(X_test)
-    test_accuracy = accuracy_score(X_test_predict,Y_test)
-    print('The accuracy of testing data is: ',test_accuracy)
-    
-
-
 """ 
 Questionnaire quick understanding key of values before full clean
 Diabetes = 1 = no yes = 2
@@ -263,6 +130,80 @@ class Cholestrol_Imputer (BaseEstimator, TransformerMixin):
         X['Cholesterol'] = imputer.fit_transform(X[['Cholesterol']])
         return X
 
+
+
+def BMI(bmi):
+    """BMI ranges: For adults, 
+    BMI ranges are: 
+    Underweight: Below 18.5 
+    Healthy weight: 18.5 to 24.9 
+    Overweight: 25 to 29.9 
+    Obese: 30 to 39.9 
+    Severely obese: 40 or above"""
+    
+    if bmi <= 18.5:
+        result = "Underweight\n"
+    elif bmi >= 18.5 and bmi <= 24.9 :
+        result = "Healthy weight\n"
+    elif bmi >= 25.0 and bmi <= 29.9 :
+        result = "Overweight\n"
+    elif bmi >= 30.0 and bmi <= 39.9 :
+        result = "Obese\n"
+    elif bmi >= 40:
+        result = "Severely obese\n"
+    else:
+        result = "Error\n"
+    return result
+
+def WHtR(whrt):
+    """WHtR ranges:
+    WHtR ranges are: 
+    Healthy: 0.4 to 0.49
+    Increased: 0.5 to 0.59
+    High: 0.6+
+    """
+    if whrt >= 0.4 and whrt <= 0.49:
+        result = "Healthy\n"
+    elif whrt >= 0.5  and whrt <= 0.59 :
+        result = "Increased risk of health complications\n"
+    elif whrt >= 0.6:
+        result = "High risk of health complications\n"
+    else:
+        result = "Error\n"
+    return result
+
+def Age(age):
+    """Age ranges:
+    Healthy: under 21 low risk
+    Increased: 22 - 44 moderate risk
+    High: 45+ High risk
+    """
+    if age <= 21:
+        result = "low risk risk of health complications\n"
+    elif age >= 22  and age <= 44 :
+        result = "Increased risk of health complications\n"
+    elif age >= 45:
+        result = "High risk of health complications\n"
+    else:
+        result = "Error\n"
+    return result
+    
+def plot_feature_importances(perm_importance_result, feat_name):
+    """bar plot the feature importance"""
+
+    fig, ax = plt.subplots()
+
+    indices = perm_importance_result["importances_mean"].argsort()
+    plt.barh(
+        range(len(indices)),
+        perm_importance_result["importances_mean"][indices],
+        xerr=perm_importance_result["importances_std"][indices],
+    )
+
+    ax.set_yticks(range(len(indices)))
+    _ = ax.set_yticklabels(feat_name[indices])
+
+
 def test(clf,filename):
         #test_data_end = pd.read_csv('datasets/questionnaire_train_data.csv')
         test_data_end = pd.read_csv(filename)
@@ -346,10 +287,68 @@ def test(clf,filename):
         
         #prediction_weight = show_prediction(clf, X_test_data_end[-1],feature_names = feature_names_end,show_feature_values=True)
         
-        return print(prediction[-1])
+         #todo creat script for the weighting to show risk facotrs 
+        
+        bmi = test_data_end['BMI'].tolist()
+        bmi = bmi[-1]
+        
+        waistcir = test_data_end['WHtR'].tolist()
+        waistcir = waistcir[-1]
+        
+        age = test_data_end['Birthdate'].tolist()
+        age = age[-1]
+        
+        sleep = test_data_end['Sleep'].tolist()
+        sleep = sleep[-1]
+        
+        activity = test_data_end['Physical_Activity'].tolist() 
+        activity = activity[-1]
+        
+        energy = test_data_end['Energy_Levels'].tolist()
+        energy = energy[-1]
+        
+        
+        fruit = test_data_end['Fruit'].tolist()
+        fruit = fruit[-1]
+        
+        veg = test_data_end['Vegetables'].tolist() 
+        veg = veg[-1]
+        
+        fast = test_data_end['Fast_Food'].tolist()
+        fast = fast[-1]
+        
+        sweets = test_data_end['Sweets'].tolist()
+        sweets = sweets[-1]
+        
+        water = test_data_end['Water'].tolist()
+        water = water[-1]
+        
+        juice =test_data_end['Juice'].tolist()
+        juice = juice[-1]
+        
+        soda = test_data_end['Soda'].tolist()
+        soda = soda[-1]
+
+        if prediction[-1] == 0:
+            disclaimer = "* Disclaimer this is not a medical diagnosis Please Consult Your Doctor to verify\n"
+            script = "You have a low risk of Type 2 Diabetes\n"
+            script_BMI = "Your BMI is " + str(bmi) +" which means that you are " + BMI(bmi)
+            script_WHtR = "Your Waist-Height Ratio is " + str(waistcir) +" which means that your are " + WHtR(waistcir)
+            #script_Age = "Your Age is " + str(age) + " which means that you are at a " + Age(age)
+            script = disclaimer + script + script_BMI + script_WHtR
+        else:
+            disclaimer = "*Disclaimer this is not a medical diagnosis Please Consult Your Doctor to verify\n"
+            script = "You have a High Risk of Type 2 Diabetes\n"
+            script_BMI = "Your BMI is " + str(bmi) +" which means that you are " + BMI(bmi)
+            script_WHtR = "Your Waist-Height Ratio is " + str(waistcir) +" which means that your are " + WHtR(waistcir)
+            #script_Age = "Your Age is " + str(age) + " which means that you are at a " + Age(age)
+            script = disclaimer + script+ script_BMI + script_WHtR
+        
+        
+        return print(script)
 
 
-def mydataset_SVM(filename):
+def mydataset_SVM():
     #Suport vector model code
     type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
     #type_2_diabetes_data = pd.read_csv(filename)
@@ -475,205 +474,7 @@ def mydataset_SVM(filename):
     test(clf_Svm,filename)
     return
 
-
-
-
-def mydataset_SVM_Prediction(filename):
-    #Suport vector model code
-    type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
-    #type_2_diabetes_data = pd.read_csv(filename)
-    # todo Clean dataset
-    #Cleaning the dataset for use e.g cacl age , numbering system change
-    #change numbering system to zero based
-    type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Gender'] = type_2_diabetes_data['Gender'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Family_History'] = type_2_diabetes_data['Family_History'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Smoking'] = type_2_diabetes_data['Smoking'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Alcohol'] = type_2_diabetes_data['Alcohol'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Dietry_Habits'] = type_2_diabetes_data['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Fruit'] = type_2_diabetes_data['Fruit'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Vegetables'] = type_2_diabetes_data['Vegetables'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Fast_Food'] = type_2_diabetes_data['Fast_Food'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Sweets'] = type_2_diabetes_data['Sweets'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Sleep'] = type_2_diabetes_data['Sleep'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Physical_Activity'] = type_2_diabetes_data['Physical_Activity'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Energy_Levels'] = type_2_diabetes_data['Energy_Levels'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Water'] = type_2_diabetes_data['Water'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Juice'] = type_2_diabetes_data['Juice'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Soda'] = type_2_diabetes_data['Soda'].apply(shift_zero_indexing)
-    #calc values
-    type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
-    
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
-    
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
-    
-    # todo adding the missing values to dataset
-    #pipeline for adding the missing values
-    """pipeline = Pipeline([("Waist_Imputer",Waist_Imputer()),
-                         ("Blood_pressure_Imputer",Blood_pressure_Imputer()),
-                         ("Glucose_Imputer",Glucose_Imputer()),
-                         ("Cholestrol_Imputer",Cholestrol_Imputer())])"""
-                         
-    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
-    
-    type_2_diabetes_data =pipeline.fit_transform(type_2_diabetes_data)
-    
-    #todo create BMI 
-    type_2_diabetes_data['BMI'] = (type_2_diabetes_data['Weight'] / type_2_diabetes_data['Height'] / type_2_diabetes_data['Height']) * 10000
-    type_2_diabetes_data['BMI'] = type_2_diabetes_data['BMI'].round(1)
-    
-    #todo create waist/height
-    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['Waist'] / type_2_diabetes_data['Height']
-    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['WHtR'].round(1)
-    
-    
-    #todo create a feature dropper for the glucose-colestroral
-    #,"Weight","Height"
-    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
-    
-    final_data = type_2_diabetes_data
-
-    X_final = final_data.drop(['Diabetes'], axis=1)
-    Y_final = final_data[['Diabetes']]
-    scaler = StandardScaler()
-    X_data_test_final = scaler.fit_transform(X_final)
-    Y_data_test_final = Y_final.to_numpy()
-    
-    
-    clf_Svm = svm.SVC(kernel='linear')
-    clf_Svm.fit(X_data_test_final,Y_data_test_final)
-    test(clf_Svm,filename)
-    
-
-def mydataset_RF_Prediction(filename):
-    type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
-    #type_2_diabetes_data = pd.read_csv(filename)
-    # todo Clean dataset
-    #Cleaning the dataset for use e.g cacl age , numbering system change
-    #change numbering system to zero based
-    type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Gender'] = type_2_diabetes_data['Gender'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Family_History'] = type_2_diabetes_data['Family_History'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Smoking'] = type_2_diabetes_data['Smoking'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Alcohol'] = type_2_diabetes_data['Alcohol'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Dietry_Habits'] = type_2_diabetes_data['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
-    
-    type_2_diabetes_data['Fruit'] = type_2_diabetes_data['Fruit'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Vegetables'] = type_2_diabetes_data['Vegetables'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Fast_Food'] = type_2_diabetes_data['Fast_Food'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Sweets'] = type_2_diabetes_data['Sweets'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Sleep'] = type_2_diabetes_data['Sleep'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Physical_Activity'] = type_2_diabetes_data['Physical_Activity'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Energy_Levels'] = type_2_diabetes_data['Energy_Levels'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Water'] = type_2_diabetes_data['Water'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Juice'] = type_2_diabetes_data['Juice'].apply(shift_zero_indexing)
-    
-    type_2_diabetes_data['Soda'] = type_2_diabetes_data['Soda'].apply(shift_zero_indexing)
-    #calc values
-    type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
-    
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
-    
-    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
-    
-    # todo adding the missing values to dataset
-    #pipeline for adding the missing values
-    """pipeline = Pipeline([("Waist_Imputer",Waist_Imputer()),
-                         ("Blood_pressure_Imputer",Blood_pressure_Imputer()),
-                         ("Glucose_Imputer",Glucose_Imputer()),
-                         ("Cholestrol_Imputer",Cholestrol_Imputer())])"""
-                         
-    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
-    
-    type_2_diabetes_data =pipeline.fit_transform(type_2_diabetes_data)
-    
-    #todo create BMI 
-    type_2_diabetes_data['BMI'] = (type_2_diabetes_data['Weight'] / type_2_diabetes_data['Height'] / type_2_diabetes_data['Height']) * 10000
-    type_2_diabetes_data['BMI'] = type_2_diabetes_data['BMI'].round(1)
-    
-    #todo create waist/height
-    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['Waist'] / type_2_diabetes_data['Height']
-    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['WHtR'].round(1)
-    
-    
-    #todo create a feature dropper for the glucose-colestroral
-    #,"Weight","Height"
-    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
-    
-    
-    # * looking at the headers of the dataset
-    #type_2_diabetes_data.head(12)
-
-    # * looking at all the statistical data from the dataset
-    #type_2_diabetes_data.describe()
-
-    #type_2_diabetes_data.info()
-    
-    final_data = type_2_diabetes_data
-
-    X_final = final_data.drop(['Diabetes'], axis=1)
-    Y_final = final_data[['Diabetes']]
-    scaler = StandardScaler()
-    X_data_test_final = scaler.fit_transform(X_final)
-    Y_data_test_final = Y_final.to_numpy()
-
-    prod_clf = RandomForestClassifier()
-
-    prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
-    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",return_train_score=True)
-    prod_grid_search.fit(X_data_test_final,Y_data_test_final)
-
-    prod_final_clf = prod_grid_search.best_estimator_
-    # * test the score of the model
-    #final_clf.score(X_data_test_final,Y_data_test_final)
-
-    feature_names = type_2_diabetes_data.columns
-    feature_names = feature_names.delete(0)
-    feature_names = feature_names.tolist()
-    
-    #show_weights(prod_final_clf,feature_names=feature_names)
-    
-    #prediction = prod_final_clf.predict(X_data_test_final)
-    #prediction
-    
-    #show_prediction(prod_final_clf, X_data_test_final[3],feature_names = feature_names,show_feature_values=True)
-    test(prod_final_clf,filename)
-    
-
-
-def mydataset_RF(filename):
+def mydataset_RF():
     type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
     #type_2_diabetes_data = pd.read_csv(filename)
     # todo Clean dataset
@@ -813,8 +614,8 @@ def mydataset_RF(filename):
 
     param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
 
-    grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
-    grid_search.fit(X_data,Y_data)
+    grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
+    grid_search.fit(X_data,Y_data.ravel())
 
 
     #display the CLF
@@ -860,8 +661,8 @@ def mydataset_RF(filename):
 
     prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
 
-    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",return_train_score=True)
-    prod_grid_search.fit(X_data_test_final,Y_data_test_final)
+    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
+    prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
 
     prod_final_clf = prod_grid_search.best_estimator_
     # * test the score of the model
@@ -876,56 +677,427 @@ def mydataset_RF(filename):
     prediction = prod_final_clf.predict(X_data_test_final)
     prediction
     
-    #show_prediction(prod_final_clf, X_data_test_final[3],feature_names = feature_names,show_feature_values=True)
+    #show_prediction(prod_final_clf, X_data_test_final[3],,feature_names = feature_names,show_feature_values=True)
     filename = "datasets/Not_Cleaned_data_project_38184_2024_12_24.csv"
     test(prod_final_clf,filename)
-    #todo creat script for the weighting to show risk facotrs 
+   
+
+def mydataset_SVM_Prediction(filename):
+    #Suport vector model code
+    type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
+    #type_2_diabetes_data = pd.read_csv(filename)
+    # todo Clean dataset
+    #Cleaning the dataset for use e.g cacl age , numbering system change
+    #change numbering system to zero based
+    
+    type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Gender'] = type_2_diabetes_data['Gender'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Family_History'] = type_2_diabetes_data['Family_History'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Smoking'] = type_2_diabetes_data['Smoking'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Alcohol'] = type_2_diabetes_data['Alcohol'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Dietry_Habits'] = type_2_diabetes_data['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Fruit'] = type_2_diabetes_data['Fruit'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Vegetables'] = type_2_diabetes_data['Vegetables'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Fast_Food'] = type_2_diabetes_data['Fast_Food'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sweets'] = type_2_diabetes_data['Sweets'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sleep'] = type_2_diabetes_data['Sleep'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Physical_Activity'] = type_2_diabetes_data['Physical_Activity'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Energy_Levels'] = type_2_diabetes_data['Energy_Levels'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Water'] = type_2_diabetes_data['Water'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Juice'] = type_2_diabetes_data['Juice'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Soda'] = type_2_diabetes_data['Soda'].apply(shift_zero_indexing)
+    #calc values
+    type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
+    
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
+    
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
+    
+    # todo adding the missing values to dataset
+    #pipeline for adding the missing values
+    """pipeline = Pipeline([("Waist_Imputer",Waist_Imputer()),
+                         ("Blood_pressure_Imputer",Blood_pressure_Imputer()),
+                         ("Glucose_Imputer",Glucose_Imputer()),
+                         ("Cholestrol_Imputer",Cholestrol_Imputer())])"""
+                         
+    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
+    
+    type_2_diabetes_data =pipeline.fit_transform(type_2_diabetes_data)
+    
+    #todo create BMI 
+    type_2_diabetes_data['BMI'] = (type_2_diabetes_data['Weight'] / type_2_diabetes_data['Height'] / type_2_diabetes_data['Height']) * 10000
+    type_2_diabetes_data['BMI'] = type_2_diabetes_data['BMI'].round(1)
+    
+    #todo create waist/height
+    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['Waist'] / type_2_diabetes_data['Height']
+    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['WHtR'].round(1)
+    
+    
+    #todo create a feature dropper for the glucose-colestroral
+    #,"Weight","Height"
+    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    
+    final_data = type_2_diabetes_data
+
+    X_final = final_data.drop(['Diabetes'], axis=1)
+    Y_final = final_data[['Diabetes']]
+    scaler = StandardScaler()
+    X_data_test_final = scaler.fit_transform(X_final)
+    Y_data_test_final = Y_final.to_numpy()
+    
+    feature_names = type_2_diabetes_data.columns
+    feature_names = feature_names.delete(0)
+    feature_names = feature_names.tolist()
+    
+    
+    clf_Svm = svm.SVC(kernel='linear',verbose=True)
+    clf_Svm.fit(X_data_test_final,Y_data_test_final.ravel())
+    
+   
+    #show_weights(clf_Svm,feature_names=feature_names)
+    
+    clf = clf_Svm
+    prediction = clf.predict(X_data_test_final)
+    prediction    
+    #prediction_weight = show_prediction(clf_Svm,X_data_test_final[3],feature_names = feature_names_end,show_feature_values=True)
+        
+    
+    
+    test(clf_Svm,filename)
+    
+
+def mydataset_RF_Prediction(filename):
+    type_2_diabetes_data = pd.read_csv('datasets/Not_Cleaned_data_project_38184_2024_12_24.csv')
+    #type_2_diabetes_data = pd.read_csv(filename)
+    # todo Clean dataset
+    #Cleaning the dataset for use e.g cacl age , numbering system change
+    #change numbering system to zero based
+    type_2_diabetes_data['Diabetes'] = type_2_diabetes_data['Diabetes'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Gender'] = type_2_diabetes_data['Gender'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Family_History'] = type_2_diabetes_data['Family_History'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Smoking'] = type_2_diabetes_data['Smoking'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Alcohol'] = type_2_diabetes_data['Alcohol'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Dietry_Habits'] = type_2_diabetes_data['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
+    
+    type_2_diabetes_data['Fruit'] = type_2_diabetes_data['Fruit'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Vegetables'] = type_2_diabetes_data['Vegetables'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Fast_Food'] = type_2_diabetes_data['Fast_Food'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sweets'] = type_2_diabetes_data['Sweets'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Sleep'] = type_2_diabetes_data['Sleep'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Physical_Activity'] = type_2_diabetes_data['Physical_Activity'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Energy_Levels'] = type_2_diabetes_data['Energy_Levels'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Water'] = type_2_diabetes_data['Water'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Juice'] = type_2_diabetes_data['Juice'].apply(shift_zero_indexing)
+    
+    type_2_diabetes_data['Soda'] = type_2_diabetes_data['Soda'].apply(shift_zero_indexing)
+    #calc values
+    type_2_diabetes_data['Birthdate'] = type_2_diabetes_data['Birthdate'].apply(calc_age)
+    
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(str)
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
+    
+    #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
+    
+    # todo adding the missing values to dataset
+    #pipeline for adding the missing values
+    """pipeline = Pipeline([("Waist_Imputer",Waist_Imputer()),
+                         ("Blood_pressure_Imputer",Blood_pressure_Imputer()),
+                         ("Glucose_Imputer",Glucose_Imputer()),
+                         ("Cholestrol_Imputer",Cholestrol_Imputer())])"""
+                         
+    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
+    
+    type_2_diabetes_data =pipeline.fit_transform(type_2_diabetes_data)
+    
+    #todo create BMI 
+    type_2_diabetes_data['BMI'] = (type_2_diabetes_data['Weight'] / type_2_diabetes_data['Height'] / type_2_diabetes_data['Height']) * 10000
+    type_2_diabetes_data['BMI'] = type_2_diabetes_data['BMI'].round(1)
+    
+    #todo create waist/height
+    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['Waist'] / type_2_diabetes_data['Height']
+    type_2_diabetes_data['WHtR'] = type_2_diabetes_data['WHtR'].round(1)
+    
+    
+    #todo create a feature dropper for the glucose-colestroral
+    #,"Weight","Height"
+    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    
+    
+    # * looking at the headers of the dataset
+    #type_2_diabetes_data.head(12)
+
+    # * looking at all the statistical data from the dataset
+    #type_2_diabetes_data.describe()
+
+    #type_2_diabetes_data.info()
+    
+    final_data = type_2_diabetes_data
+
+    X_final = final_data.drop(['Diabetes'], axis=1)
+    Y_final = final_data[['Diabetes']]
+    scaler = StandardScaler()
+    X_data_test_final = scaler.fit_transform(X_final)
+    Y_data_test_final = Y_final.to_numpy()
+
+    prod_clf = RandomForestClassifier()
+
+    #prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    prod_param_gird = [{'n_estimators':[1,2,3,4,5],'max_depth':[2,4,6,8,10],'min_samples_leaf':[1,2,4],'max_features':[1,2,3,4,5,6,7,8]}]
+    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",verbose=3,return_train_score=True)
+    prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
+    #prod_grid_search.fit(X_final,Y_final)
+
+    prod_final_clf = prod_grid_search.best_estimator_
+    
+    best_features = prod_final_clf.feature_importances_
+    
+    #feature_names = type_2_diabetes_data.columns
+    
+    #imp = importances(prod_final_clf,X_final,Y_final)
+    #viz = plot_importances(imp)
+    #viz.view()
+    #importance  = permutation_importance(prod_final_clf,X_data_test_final,Y_data_test_final)
+    #plot_feature_importances(importance, feature_names)
+    
+    feature_names = type_2_diabetes_data.columns
+    feature_names = feature_names.delete(0)
+    feature_names = feature_names.tolist()
+    
+    
+    
+    
+    # * test the score of the model
+    #final_clf.score(X_data_test_final,Y_data_test_final)
+
+    
+    
+    
+    
+    
+    feature_names = type_2_diabetes_data.columns
+    feature_names = feature_names.delete(0)
+    feature_names = feature_names.tolist()
+    
+    #show_weights(prod_final_clf,feature_names=feature_names)
+    
+    #prediction = prod_final_clf.predict(X_data_test_final)
+    #prediction
+    
+    #show_prediction(prod_final_clf, X_data_test_final[2],feature_names = feature_names,show_feature_values=True)
+    
+    test(prod_final_clf,filename)
 
   
-#mydataset_RF()
-console = Console()
-app = typer.Typer()
+  
+  
+  
+  
 
-#APP 
-@app.command("insert")
-def questionaire_Create():
-    """
-    Inserts dataset
-    """
-    Title = 'Inserts dataset'
-    print(pyfiglet.figlet_format(Title))
+# def randomforest():
+#     type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
 
-@app.command("split")
-def questionaire_Create():
-    """
-    Splits Data into training and test data
-    """
-    Title = 'Split Data'
-    print(pyfiglet.figlet_format(Title))
+#     #looking at the headers of the dataset
+#     type_2_diabetes_data.head(5)
 
-@app.command("Model")
-def questionaire_Create():
-    """
-    Select model for training/
-    """
-    Title = 'Select model for training'
-    print(pyfiglet.figlet_format(Title))
+#     #looking at all the statistical data from the dataset
+#     type_2_diabetes_data.describe()
 
-@app.command("train")
-def questionaire_Create():
-    """
-    Begins training the model on dataset
-    """
-    Title = 'Begin training'
-    print(pyfiglet.figlet_format(Title))
+#     type_2_diabetes_data.info()
+
+#     #heatmap visulisation to see corrilations
+#     sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+
+#     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
+#     for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+#         strat_train_set = type_2_diabetes_data.loc[train_indices]
+#         strat_test_set = type_2_diabetes_data.loc[test_indices]
+
+#     #Stratified test set    
+#     strat_test_set
+#     #Stratified train set   
+#     strat_train_set
+
+#     strat_train_set.info()
+
+
+#     X = strat_train_set.drop(['Diabetes_012'], axis=1)
+#     y = strat_train_set[['Diabetes_012']]
+#     scaler = StandardScaler()
+#     X_data = scaler.fit_transform(X)
+#     Y_data = y.to_numpy()
+#     #random forest set up
+#     clf = RandomForestClassifier()
+
+#     param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+
+#     grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+#     grid_search.fit(X_data,Y_data)
+
+#     final_clf = grid_search.best_estimator_
+
+
+#     X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
+#     Y_test = strat_test_set[['Diabetes_012']]
+#     scaler = StandardScaler()
+#     X_data_test = scaler.fit_transform(X_test)
+#     Y_data_test = Y_test.to_numpy()
+
+#     final_clf.score(X_data_test,Y_data_test)
+
+#     #exporting file
+#     dump(final_clf,filename="clf_random_forest_model_First.joblib")
+
+#     #importing file
+#     loaded_model = load(filename="clf_random_forest_model_First.joblib")\
+        
+#     joblib_y_preds = loaded_model.predict(X_test)
+#     loaded_model.score(X_data_test,Y_data_test)
+
+
+#     final_data = type_2_diabetes_data
+
+#     X_final = final_data(['Diabetes_012'], axis=1)
+#     Y_final = final_data[['Diabetes_012']]
+#     scaler = StandardScaler()
+#     X_data_test = scaler.fit_transform(X_final)
+#     Y_data_test = y.to_numpy(Y_final)
+
+#     prod_clf = RandomForestClassifier()
+
+#     param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+
+#     grid_search = GridSearchCV(prod_clf,param_gird,cv=3,scoring="accuracy",return_train_score=True)
+#     grid_search.fit(X_final,Y_final)
+
+#     prod_final_clf = grid_search.best_estimator_
+
+# def supportvector():
+# #Suport vector model code
+#     type_2_diabetes_data = pd.read_csv('diabetes_012_health_indicators_BRFSS2015.csv')
+
+#     #looking at the headers of the dataset
+#     type_2_diabetes_data.head(5)
+
+#     #looking at all the statistical data from the dataset
+#     type_2_diabetes_data.describe()
+
+#     type_2_diabetes_data.info()
+
+#     #heatmap visulisation to see corrilations
+#     sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+
+#     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
+#     for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes_012","Sex","Age"]]):
+#         strat_train_set = type_2_diabetes_data.loc[train_indices]
+#         strat_test_set = type_2_diabetes_data.loc[test_indices]
+
+#     #Stratified test set    
+#     strat_test_set
+#     #Stratified train set   
+#     strat_train_set
+
+#     strat_train_set.info()
+
+
+#     X_train = strat_train_set.drop(['Diabetes_012'], axis=1)
+#     y_train = strat_train_set[['Diabetes_012']]
+#     scaler = StandardScaler()
+#     X_data = scaler.fit_transform(X_train)
+#     Y_data = y_train.to_numpy()
+
+#     X_test = strat_test_set.drop(['Diabetes_012'], axis=1)
+#     Y_test = strat_test_set[['Diabetes_012']]
+#     scaler = StandardScaler()
+#     X_data_test = scaler.fit_transform(X_test)
+#     Y_data_test = Y_test.to_numpy()
+
+#     clf_Svm = svm.SVC(kernel='linear')
+#     clf_Svm.fit(X_train,y_train)
     
-#have the option to save the model at the end and add the accuracy of it    
-@app.command("test")
-def questionaire_Create():
-    """
-    Model makes predictions and will evaluate the accuracy of them
-    """
-    Title = 'Begin test/'
-    print(pyfiglet.figlet_format(Title))
+#     dump(clf_Svm,filename="clf_random_Support_Vector_model_First.joblib")
+    
+#     X_train_predict = clf_Svm.predict(X_train)
+#     training_accuracy = accuracy_score(X_train_predict,y_train)
+#     print('The accuracy of training data is: ',training_accuracy)
+    
+    
+#     X_test_predict = clf_Svm.predict(X_test)
+#     test_accuracy = accuracy_score(X_test_predict,Y_test)
+#     print('The accuracy of testing data is: ',test_accuracy)
+
+# #mydataset_RF()
+# console = Console()
+# app = typer.Typer()
+
+# #APP 
+# @app.command("insert")
+# def questionaire_Create():
+#     """
+#     Inserts dataset
+#     """
+#     Title = 'Inserts dataset'
+#     print(pyfiglet.figlet_format(Title))
+
+# @app.command("split")
+# def questionaire_Create():
+#     """
+#     Splits Data into training and test data
+#     """
+#     Title = 'Split Data'
+#     print(pyfiglet.figlet_format(Title))
+
+# @app.command("Model")
+# def questionaire_Create():
+#     """
+#     Select model for training/
+#     """
+#     Title = 'Select model for training'
+#     print(pyfiglet.figlet_format(Title))
+
+# @app.command("train")
+# def questionaire_Create():
+#     """
+#     Begins training the model on dataset
+#     """
+#     Title = 'Begin training'
+#     print(pyfiglet.figlet_format(Title))
+    
+# #have the option to save the model at the end and add the accuracy of it    
+# @app.command("test")
+# def questionaire_Create():
+#     """
+#     Model makes predictions and will evaluate the accuracy of them
+#     """
+#     Title = 'Begin test/'
+#     print(pyfiglet.figlet_format(Title))
     
     

@@ -40,7 +40,7 @@ Model = [
     inquirer.List(
         "Model",
         message="Which model would you like to choose?",
-        choices=["Decision trees", "Random forests"],
+        choices=["Random Forest", "Support Vector"],
     ),
 ] 
 
@@ -236,7 +236,7 @@ def questionnaire_train():
     sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts",choices=["1","2","3","4","5"])
     sleep = Sleep_to_numerical(inquirer.prompt(Sleep))
     activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you",choices=["1","2","3","4","5"])
-    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day",choices=["1","2","3","4","5"])
+    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋 energy levels throughout the day",choices=["1","2","3","4","5"])
     water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day",choices=["1","2","3","4","5"])
     juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day",choices=["1","2","3","4","5"])
     soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day",choices=["1","2","3","4","5"])
@@ -250,6 +250,7 @@ def questionnaire_train():
     #blood_pressure = Prompt.ask("19. Please input your ⚖️ blood presure result")
     #glucose = Prompt.ask("20. Please input your ⚖️ glucose result")
     #Cholesterol = Prompt.ask("21. Please input your Cholesterol result")
+    
     return
     
     
@@ -273,7 +274,7 @@ def questionnaire_test():
     sweets = Prompt.ask("On a scale of 1-5 how much sweet and sugary food to you eat E.g. 🍫 Chocolate, 🍩 Donuts",choices=["1","2","3","4","5"])
     sleep = Sleep_to_numerical(inquirer.prompt(Sleep))
     activity = Prompt.ask("On a scale of 1-5 how 🏃 Phyisically active are you",choices=["1","2","3","4","5"])
-    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋energy levels throughout the day",choices=["1","2","3","4","5"])
+    energy_levels = Prompt.ask("On a scale of 1-5 how are your 🔋 energy levels throughout the day",choices=["1","2","3","4","5"])
     water = Prompt.ask("On a scale of 1-5 how much 💧 water do you drink throughout the day",choices=["1","2","3","4","5"])
     juice = Prompt.ask("On a scale of 1-5 how much 🧃 juice do you drink throughout the day",choices=["1","2","3","4","5"])
     soda = Prompt.ask("On a scale of 1-5 how much 🥤 soda do you drink throughout the day",choices=["1","2","3","4","5"])
@@ -285,9 +286,9 @@ def questionnaire_test():
     
     model = inquirer.prompt(Model)
     
-    if model.get("Model") == "Decision trees":
+    if model.get("Model") == "Random Forest":
         predict.mydataset_RF_Prediction(filename)
-    elif model.get("Model") == "Random forests":
+    elif model.get("Model") == "Support Vector":
         predict.mydataset_SVM_Prediction(filename)
     else:
         print("Error")
@@ -311,7 +312,7 @@ def questionaire_Create():
     #add recomendation 
     #add results from questionaire
     
-@app.command("Input")
+@app.command("input")
 def questionaire_Create():
     """
     Gather Data for the Models
@@ -321,11 +322,3 @@ def questionaire_Create():
     #add recomendation 
     #add results from questionaire
     
-@app.command("Model")
-def questionaire_Create():
-    """
-    Choose model type
-    """
-    Title = 'Choose model type'
-    print(pyfiglet.figlet_format(Title))
-    model = inquirer.prompt(Model)
