@@ -221,6 +221,7 @@ def create_csv_test(birthdate,gender,family,smoker,alcohol,diet,fruit,vegtables,
 def questionnaire_train():
     Title = 'Type 2 Diabeters Risk Assesment Questionaire'
     print(pyfiglet.figlet_format(Title))
+    print("* Disclaimer this research study is part of an academic thesis your information is private and confidential continuing is agreement")
     Diabetes = confirm_to_numerical(Confirm.ask("Do you have diabetes?"))
     birthdate = Prompt.ask("Please Enter your 🎂 Birthdate in Format DD-MM-YY")
     gender = gender_to_numerical(inquirer.prompt(Gender))
@@ -259,11 +260,13 @@ def questionnaire_train():
 def questionnaire_test():
     Title = 'Type 2 Diabeters Risk Assesment Questionaire'
     print(pyfiglet.figlet_format(Title))
+    print("* Disclaimer this research study is part of an academic thesis your information is private and confidential continuing is agreement")
     #Diabetes = confirm_to_numerical(Confirm.ask("Do you have diabetes?"))
     birthdate = Prompt.ask("Please Enter your 🎂 Birthdate in Format DD-MM-YY")
     gender = gender_to_numerical(inquirer.prompt(Gender))
     #print(gender)
     family = confirm_to_numerical(Confirm.ask("Do you have any immediate family that has diabetes?"))
+    print(family)
     smoker = confirm_to_numerical(Confirm.ask("Do you smoke 🚬 regularly?"))
     #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
