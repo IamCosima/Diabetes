@@ -277,6 +277,7 @@ def test(clf,filename):
     X_test_data_end = normalize.fit_transform(X_test_data_end)
         
     prediction_result= clf.predict(X_test_data_end)
+    print(prediction_result)
         
     feature_names_end = test_data_end.columns
     feature_names_end = feature_names_end.tolist()
@@ -916,7 +917,7 @@ def mydataset_RF_Prediction(filename):
     
     Y_data_test_final = Y_final.to_numpy()
 
-    prod_clf = RandomForestClassifier(random_state=114)
+    prod_clf = RandomForestClassifier()
 
     prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
 
@@ -948,79 +949,79 @@ def mydataset_RF_Prediction(filename):
     
     #show_prediction(prod_final_clf, X_data_test_final[2],feature_names = feature_names,show_feature_values=True)
     
-    clf = prod_final_clf
-    test_data_end = pd.read_csv('datasets/questionnaire_user_data.csv')
-        #test_data_end = pd.read_csv(filename)
-        #Cleaning the dataset for use e.g cacl age , numbering system change
-        #change numbering system to zero based
+    # clf = prod_final_clf
+    # test_data_end = pd.read_csv('datasets/questionnaire_user_data.csv')
+    #     #test_data_end = pd.read_csv(filename)
+    #     #Cleaning the dataset for use e.g cacl age , numbering system change
+    #     #change numbering system to zero based
         
-    test_data_end['Gender'] = test_data_end['Gender'].apply(shift_zero_indexing)
+    # test_data_end['Gender'] = test_data_end['Gender'].apply(shift_zero_indexing)
         
-    test_data_end['Family_History'] = test_data_end['Family_History'].apply(shift_zero_indexing_Yes_No)
+    # test_data_end['Family_History'] = test_data_end['Family_History'].apply(shift_zero_indexing_Yes_No)
         
-    test_data_end['Smoking'] = test_data_end['Smoking'].apply(shift_zero_indexing_Yes_No)
+    # test_data_end['Smoking'] = test_data_end['Smoking'].apply(shift_zero_indexing_Yes_No)
         
-    test_data_end['Alcohol'] = test_data_end['Alcohol'].apply(shift_zero_indexing_Yes_No)
+    # test_data_end['Alcohol'] = test_data_end['Alcohol'].apply(shift_zero_indexing_Yes_No)
         
-    test_data_end['Dietry_Habits'] = test_data_end['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
+    # test_data_end['Dietry_Habits'] = test_data_end['Dietry_Habits'].apply(shift_zero_indexing_Yes_No)
         
-    test_data_end['Fruit'] = test_data_end['Fruit'].apply(shift_zero_indexing)
+    # test_data_end['Fruit'] = test_data_end['Fruit'].apply(shift_zero_indexing)
         
-    test_data_end['Vegetables'] = test_data_end['Vegetables'].apply(shift_zero_indexing)
+    # test_data_end['Vegetables'] = test_data_end['Vegetables'].apply(shift_zero_indexing)
         
-    test_data_end['Fast_Food'] = test_data_end['Fast_Food'].apply(shift_zero_indexing)
+    # test_data_end['Fast_Food'] = test_data_end['Fast_Food'].apply(shift_zero_indexing)
         
-    test_data_end['Sweets'] = test_data_end['Sweets'].apply(shift_zero_indexing)
+    # test_data_end['Sweets'] = test_data_end['Sweets'].apply(shift_zero_indexing)
         
-    test_data_end['Sleep'] = test_data_end['Sleep'].apply(shift_zero_indexing)
+    # test_data_end['Sleep'] = test_data_end['Sleep'].apply(shift_zero_indexing)
         
-    test_data_end['Physical_Activity'] = test_data_end['Physical_Activity'].apply(shift_zero_indexing)
+    # test_data_end['Physical_Activity'] = test_data_end['Physical_Activity'].apply(shift_zero_indexing)
         
-    test_data_end['Energy_Levels'] = test_data_end['Energy_Levels'].apply(shift_zero_indexing)
+    # test_data_end['Energy_Levels'] = test_data_end['Energy_Levels'].apply(shift_zero_indexing)
         
-    test_data_end['Water'] = test_data_end['Water'].apply(shift_zero_indexing)
+    # test_data_end['Water'] = test_data_end['Water'].apply(shift_zero_indexing)
         
-    test_data_end['Juice'] = test_data_end['Juice'].apply(shift_zero_indexing)
+    # test_data_end['Juice'] = test_data_end['Juice'].apply(shift_zero_indexing)
         
-    test_data_end['Soda'] = test_data_end['Soda'].apply(shift_zero_indexing)
-        #calc values
-    test_data_end['Birthdate'] = test_data_end['Birthdate'].apply(calc_age)
+    # test_data_end['Soda'] = test_data_end['Soda'].apply(shift_zero_indexing)
+    #     #calc values
+    # test_data_end['Birthdate'] = test_data_end['Birthdate'].apply(calc_age)
         
-        #test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].astype(str)
-        #test_data_end['Blood_Pressure']
-        #test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].apply(calc_blood_pressure)
+    #     #test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].astype(str)
+    #     #test_data_end['Blood_Pressure']
+    #     #test_data_end['Blood_Pressure'] = test_data_end['Blood_Pressure'].apply(calc_blood_pressure)
         
         
-        # todo adding the missing values to dataset                        
-    pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
+    #     # todo adding the missing values to dataset                        
+    # pipeline = Pipeline([("Waist_Imputer",Waist_Imputer())])
             
-    test_data_end =pipeline.fit_transform(test_data_end)
+    # test_data_end =pipeline.fit_transform(test_data_end)
             
-        #todo create BMI 
-    test_data_end['BMI'] = (test_data_end['Weight'] / test_data_end['Height'] / test_data_end['Height']) * 10000
-    test_data_end['BMI'] = test_data_end['BMI'].round(1)
+    #     #todo create BMI 
+    # test_data_end['BMI'] = (test_data_end['Weight'] / test_data_end['Height'] / test_data_end['Height']) * 10000
+    # test_data_end['BMI'] = test_data_end['BMI'].round(1)
             
-        #todo create waist/height
-    test_data_end['WHtR'] = test_data_end['Waist'] / test_data_end['Height']
-    test_data_end['WHtR'] = test_data_end['WHtR'].round(1)
+    #     #todo create waist/height
+    # test_data_end['WHtR'] = test_data_end['Waist'] / test_data_end['Height']
+    # test_data_end['WHtR'] = test_data_end['WHtR'].round(1)
             
             
-        #todo create a feature dropper for the glucose-colestroral
-        #,"Weight","Height"
-    test_data_end = test_data_end.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    #     #todo create a feature dropper for the glucose-colestroral
+    #     #,"Weight","Height"
+    # test_data_end = test_data_end.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
             
-        #print(test_data_end.head(-1))
+    #     #print(test_data_end.head(-1))
         
-    Final_test_data_end = test_data_end
+    # Final_test_data_end = test_data_end
         
-    X_test_data_end = Final_test_data_end
-    #scaler_test_data_end = StandardScaler()
-    #X_test_data_end = scaler_test_data_end.fit_transform(X_test_data_end)
-    normalize = Normalizer()
-    X_test_data_end = normalize.fit_transform(X_test_data_end)
+    # X_test_data_end = Final_test_data_end
+    # #scaler_test_data_end = StandardScaler()
+    # #X_test_data_end = scaler_test_data_end.fit_transform(X_test_data_end)
+    # normalize = Normalizer()
+    # X_test_data_end = normalize.fit_transform(X_test_data_end)
         
-    prediction_result= clf.predict(X_test_data_end)
-    print(prediction_result)
+    # prediction_result= clf.predict(X_test_data_end)
+    # print(prediction_result)
     test(prod_final_clf,filename)
 
   
