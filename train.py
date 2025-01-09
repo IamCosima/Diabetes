@@ -545,7 +545,7 @@ def mydataset_RF():
     
     
     # * looking at the headers of the dataset
-    #type_2_diabetes_data.head(12)
+    #type_2_diabetes_data.head(5)
 
     # * looking at all the statistical data from the dataset
     #type_2_diabetes_data.describe()
@@ -581,7 +581,7 @@ def mydataset_RF():
     22  Cholesterol        9 non-null      float64 """
     
     #heatmap visulisation to see corrilations
-    #sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
 
     
    #** Splits the dataset into training and test sets with 20% of the data being reserved for testing
@@ -635,13 +635,13 @@ def mydataset_RF():
     Y_data_test = Y_test.to_numpy()
 
     # * test the score of the model
-    #*final_clf.score(X_data_test,Y_data_test)
+    final_clf.score(X_data_test,Y_data_test)
     
     feature_names = type_2_diabetes_data.columns
     feature_names = feature_names.delete(0)
     feature_names = feature_names.tolist()
     #* Weights of the model
-    #*show_weights(final_clf,feature_names=feature_names)
+    show_weights(final_clf,feature_names=feature_names)
     
 
     #exporting file
