@@ -189,20 +189,20 @@ def Age(age):
         result = "Error\n"
     return result
     
-def plot_feature_importances(perm_importance_result, feat_name):
-    """bar plot the feature importance"""
+# def plot_feature_importances(perm_importance_result, feat_name):
+#     """bar plot the feature importance"""
 
-    fig, ax = plt.subplots()
+#     fig, ax = plt.subplots()
 
-    indices = perm_importance_result["importances_mean"].argsort()
-    plt.barh(
-        range(len(indices)),
-        perm_importance_result["importances_mean"][indices],
-        xerr=perm_importance_result["importances_std"][indices],
-    )
+#     indices = perm_importance_result["importances_mean"].argsort()
+#     plt.barh(
+#         range(len(indices)),
+#         perm_importance_result["importances_mean"][indices],
+#         xerr=perm_importance_result["importances_std"][indices],
+#     )
 
-    ax.set_yticks(range(len(indices)))
-    _ = ax.set_yticklabels(feat_name[indices])
+#     ax.set_yticks(range(len(indices)))
+#     _ = ax.set_yticklabels(feat_name[indices])
 
 
 def test(clf,filename):
@@ -545,7 +545,7 @@ def mydataset_RF():
     
     
     # * looking at the headers of the dataset
-    #type_2_diabetes_data.head(5)
+    #type_2_diabetes_data.head(90)
 
     # * looking at all the statistical data from the dataset
     #type_2_diabetes_data.describe()
@@ -578,10 +578,83 @@ def mydataset_RF():
     19  Waist              50 non-null     float64
     20  Blood_Pressure     26 non-null     float64
     21  Glucose            12 non-null     float64
-    22  Cholesterol        9 non-null      float64 """
+    22  Cholesterol        9 non-null      float64 
+    
+    Data columns (total 17 columns):
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   Diabetes           90 non-null     int64  
+ 1   Birthdate          90 non-null     int64  
+ 2   Gender             90 non-null     int64  
+ 3   Family_History     90 non-null     int64  
+ 4   Fruit              90 non-null     int64  
+ 5   Vegetables         90 non-null     int64  
+ 6   Fast_Food          90 non-null     int64  
+ 7   Sweets             90 non-null     int64  
+ 8   Sleep              90 non-null     int64  
+ 9   Physical_Activity  90 non-null     int64  
+ 10  Energy_Levels      90 non-null     int64  
+ 11  Water              90 non-null     int64  
+ 12  Juice              90 non-null     int64  
+ 13  Soda               90 non-null     int64  
+ 14  Waist              90 non-null     float64
+ 15  BMI                90 non-null     float64
+ 16  WHtR               90 non-null     float64
+    """
     
     #heatmap visulisation to see corrilations
     sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+   
+    dia = sns.displot(data=type_2_diabetes_data, x='Diabetes', bins = 2,) 
+    dia.set(title= "Distribution of People With Type 2 diabetes",xlabel = "Diabetes: 0 = non-diabetic, 1 = diabetic",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
+    
+    birth = sns.displot(data=type_2_diabetes_data, x='Birthdate',bins = 20,binwidth=10) 
+    birth.set(xlabel = "Distribution of Age",xmargin=0)
+    
+    gender = sns.displot(data=type_2_diabetes_data, x='Gender',bins = 2,binwidth = 0.6) 
+    gender.set(xlabel = "Distribution of Gender",xmargin=0.1 ,xlim =(0,2), xticks=(0,2))
+    
+    Family_History = sns.displot(data=type_2_diabetes_data, x='Family_History',bins = 2) 
+    Family_History.set(xlabel = "Distribution of Family_History",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
+    
+    Fruit = sns.displot(data=type_2_diabetes_data, x='Fruit',bins = 5) 
+    Fruit.set(xlabel = "Distribution of Fruit Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Vegetables = sns.displot(data=type_2_diabetes_data, x='Vegetables',bins = 5) 
+    Vegetables.set(xlabel = "Distribution of Vegetables Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Fast_Food = sns.displot(data=type_2_diabetes_data, x='Fast_Food',bins = 5) 
+    Fast_Food.set(xlabel = "Distribution of Fast Food",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Sweets = sns.displot(data=type_2_diabetes_data, x='Sweets',bins = 5) 
+    Sweets.set(xlabel = "Distribution of Sweets Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Sleep =  sns.displot(data=type_2_diabetes_data, x='Sleep',bins = 5) 
+    Sleep.set(xlabel = "Distribution of Sleep Duration",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Physical_Activity = sns.displot(data=type_2_diabetes_data, x='Physical_Activity',bins = 5) 
+    Physical_Activity.set(xlabel = "Distribution of Physical Activity",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Energy_Levels = sns.displot(data=type_2_diabetes_data, x='Energy_Levels',bins = 5) 
+    Energy_Levels.set(xlabel = "Distribution of Energy Levels",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Water = sns.displot(data=type_2_diabetes_data, x='Water',bins = 5) 
+    Water.set(xlabel = "Distribution of Water Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Juice = sns.displot(data=type_2_diabetes_data, x='Juice',bins = 5) 
+    Juice.set(xlabel = "Distribution of Juice Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    Soda = sns.displot(data=type_2_diabetes_data, x='Soda',bins = 5) 
+    Soda.set(xlabel = "Distribution of Soda Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    BMI = sns.displot(data=type_2_diabetes_data, x='BMI',bins = 5) 
+    BMI.set(xlabel = "Distribution of BMI ",xmargin=0.1)
+    
+    WHtR = sns.displot(data=type_2_diabetes_data, x='WHtR') 
+    WHtR.set(xlabel = "Distribution of WHtR ",xmargin=0.1,xlim =(0,1))
+
+
+
 
     
    #** Splits the dataset into training and test sets with 20% of the data being reserved for testing
