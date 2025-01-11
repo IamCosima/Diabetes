@@ -1,12 +1,12 @@
-import typer
+#import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
 from rich.prompt import Confirm
-import pyfiglet
+#import pyfiglet
 from typing_extensions import Annotated
-import inquirer
+#import inquirer
 from datetime import datetime, date 
 
 import numpy as np
@@ -21,6 +21,7 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 from joblib import dump,load
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix 
 from sklearn.base import BaseEstimator,TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -28,7 +29,7 @@ from eli5 import show_weights
 from eli5 import show_prediction
 from sklearn.inspection import permutation_importance
 import time
-from rfpimp import *
+#from rfpimp import *
     
 """ 
 Questionnaire quick understanding key of values before full clean
@@ -603,59 +604,103 @@ def mydataset_RF():
     """
     
     #heatmap visulisation to see corrilations
-    sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
-   
-    dia = sns.displot(data=type_2_diabetes_data, x='Diabetes', bins = 2,) 
-    dia.set(title= "Distribution of People With Type 2 diabetes",xlabel = "Diabetes: 0 = non-diabetic, 1 = diabetic",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
+    #cff7d2
+    #295b3e
     
-    birth = sns.displot(data=type_2_diabetes_data, x='Birthdate',bins = 20,binwidth=10) 
-    birth.set(xlabel = "Distribution of Age",xmargin=0)
     
-    gender = sns.displot(data=type_2_diabetes_data, x='Gender',bins = 2,binwidth = 0.6) 
-    gender.set(xlabel = "Distribution of Gender",xmargin=0.1 ,xlim =(0,2), xticks=(0,2))
+    #*Distribution type graphs
+    plt.figure()
+    label = ['Non-Diabetic','Type 2 Diabetic']
+    dia_counts = type_2_diabetes_data['Diabetes'].value_counts(dropna=False)
+    plt.title('Distribution of Participant diabetic status')
+    plt.pie(dia_counts, labels=label,autopct='%.0f%%',colors=sns.color_palette("pastel", 8),) 
+    plt.show()
+        
+    #dia = sns.displot(data=type_2_diabetes_data, x='Diabetes', bins = 2,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    #dia.set(title= "Distribution of People With Type 2 diabetes",xlabel = "Diabetes: 0 = non-diabetic, 1 = diabetic",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
     
-    Family_History = sns.displot(data=type_2_diabetes_data, x='Family_History',bins = 2) 
-    Family_History.set(xlabel = "Distribution of Family_History",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
+    birth = sns.displot(data=type_2_diabetes_data, x='Birthdate',bins = 20,binwidth=10,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    birth.set(title = "Distribution of Age",xmargin=0)
     
-    Fruit = sns.displot(data=type_2_diabetes_data, x='Fruit',bins = 5) 
-    Fruit.set(xlabel = "Distribution of Fruit Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    gender = sns.displot(data=type_2_diabetes_data, x='Gender',bins = 2,binwidth = 0.6,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    gender.set(title = "Distribution of Gender",xmargin=0.1 ,xlim =(0,2), xticks=(0,2))
     
-    Vegetables = sns.displot(data=type_2_diabetes_data, x='Vegetables',bins = 5) 
-    Vegetables.set(xlabel = "Distribution of Vegetables Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Family_History = sns.displot(data=type_2_diabetes_data, x='Family_History',bins = 2,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Family_History.set(title = "Distribution of Family_History",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
     
-    Fast_Food = sns.displot(data=type_2_diabetes_data, x='Fast_Food',bins = 5) 
-    Fast_Food.set(xlabel = "Distribution of Fast Food",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Fruit = sns.displot(data=type_2_diabetes_data, x='Fruit',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Fruit.set(title = "Distribution of Fruit Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Sweets = sns.displot(data=type_2_diabetes_data, x='Sweets',bins = 5) 
-    Sweets.set(xlabel = "Distribution of Sweets Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Vegetables = sns.displot(data=type_2_diabetes_data, x='Vegetables',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Vegetables.set(title = "Distribution of Vegetables Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Sleep =  sns.displot(data=type_2_diabetes_data, x='Sleep',bins = 5) 
-    Sleep.set(xlabel = "Distribution of Sleep Duration",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Fast_Food = sns.displot(data=type_2_diabetes_data, x='Fast_Food',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Fast_Food.set(title = "Distribution of Fast Food",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Physical_Activity = sns.displot(data=type_2_diabetes_data, x='Physical_Activity',bins = 5) 
-    Physical_Activity.set(xlabel = "Distribution of Physical Activity",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Sweets = sns.displot(data=type_2_diabetes_data, x='Sweets',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Sweets.set(title = "Distribution of Sweets Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Energy_Levels = sns.displot(data=type_2_diabetes_data, x='Energy_Levels',bins = 5) 
-    Energy_Levels.set(xlabel = "Distribution of Energy Levels",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Sleep =  sns.displot(data=type_2_diabetes_data, x='Sleep',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Sleep.set(title = "Distribution of Sleep Duration",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Water = sns.displot(data=type_2_diabetes_data, x='Water',bins = 5) 
-    Water.set(xlabel = "Distribution of Water Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Physical_Activity = sns.displot(data=type_2_diabetes_data, x='Physical_Activity',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Physical_Activity.set(title = "Distribution of Physical Activity",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Juice = sns.displot(data=type_2_diabetes_data, x='Juice',bins = 5) 
-    Juice.set(xlabel = "Distribution of Juice Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Energy_Levels = sns.displot(data=type_2_diabetes_data, x='Energy_Levels',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Energy_Levels.set(title = "Distribution of Energy Levels",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    Soda = sns.displot(data=type_2_diabetes_data, x='Soda',bins = 5) 
-    Soda.set(xlabel = "Distribution of Soda Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    Water = sns.displot(data=type_2_diabetes_data, x='Water',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Water.set(title = "Distribution of Water Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    BMI = sns.displot(data=type_2_diabetes_data, x='BMI',bins = 5) 
-    BMI.set(xlabel = "Distribution of BMI ",xmargin=0.1)
+    Juice = sns.displot(data=type_2_diabetes_data, x='Juice',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Juice.set(title = "Distribution of Juice Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
     
-    WHtR = sns.displot(data=type_2_diabetes_data, x='WHtR') 
-    WHtR.set(xlabel = "Distribution of WHtR ",xmargin=0.1,xlim =(0,1))
-
-
-
-
+    Soda = sns.displot(data=type_2_diabetes_data, x='Soda',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    Soda.set(title = "Distribution of Soda Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    
+    BMI = sns.displot(data=type_2_diabetes_data, x='BMI',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    BMI.set(title = "Distribution of BMI ",xmargin=0.1)
+    
+    
+    WHtR = sns.displot(data=type_2_diabetes_data, x='WHtR',color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    WHtR.set(title = "Distribution of WHtR ",xmargin=0.1,xlim =(0,1))
+    
+    '''
+        Data columns (total 17 columns):
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   Diabetes           90 non-null     int64  
+ 1   Birthdate          90 non-null     int64  
+ 2   Gender             90 non-null     int64  
+ 3   Family_History     90 non-null     int64  
+ 4   Fruit              90 non-null     int64  
+ 5   Vegetables         90 non-null     int64  
+ 6   Fast_Food          90 non-null     int64  
+ 7   Sweets             90 non-null     int64  
+ 8   Sleep              90 non-null     int64  
+ 9   Physical_Activity  90 non-null     int64  
+ 10  Energy_Levels      90 non-null     int64  
+ 11  Water              90 non-null     int64  
+ 12  Juice              90 non-null     int64  
+ 13  Soda               90 non-null     int64  
+ 14  Waist              90 non-null     float64
+ 15  BMI                90 non-null     float64
+ 16  WHtR               90 non-null     float64
+    '''
+    
+    
+    #* Relationship type graphs
+    
+    # diet = type_2_diabetes_data[['Birthdate','Fruit','Vegetables','Fast_Food','Sweets','Water','Juice','Soda']]
+    # diet_data = pd.melt(diet,id_vars=['Birthdate'])
+    # sns.lineplot(data=diet_data,x= 'Birthdate',y='value', hue='variable',estimator=None)
+    # sns.set(title = "Distribution of Soda Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
+    
+    corrheat = sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
+    
+    BMI_WHR  = sns.lineplot(data = type_2_diabetes_data, x="BMI" ,y = 'WHtR',color="#cff7d2",)
+    BMI_WHR.set(title = "Relationship between BMI vs WHtR  ",xmargin=0.1)
     
    #** Splits the dataset into training and test sets with 20% of the data being reserved for testing
     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
@@ -687,8 +732,11 @@ def mydataset_RF():
     #random forest set up
     clf = RandomForestClassifier()
 
-    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
+    #param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
+    
+    
+    
     grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
     grid_search.fit(X_data,Y_data.ravel())
 
@@ -740,14 +788,15 @@ def mydataset_RF():
 
     prod_clf = RandomForestClassifier()
 
-    prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
-    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
+    #prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
+    
+    prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=5,scoring="accuracy",verbose=1,return_train_score=True)
     prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
 
     prod_final_clf = prod_grid_search.best_estimator_
     # * test the score of the model
-    #final_clf.score(X_data_test_final,Y_data_test_final)
+    prod_final_clf.score(X_data_test_final,Y_data_test_final)
 
     feature_names = type_2_diabetes_data.columns
     feature_names = feature_names.delete(0)
@@ -758,9 +807,35 @@ def mydataset_RF():
     #Fix = final_data.drop(['Diabetes'],axis=1)
     #fixing = scaler.fit_transform(Fix)
     #prediction = prod_final_clf.predict(fixing)
+   
+    prediction_Prod = prod_final_clf.predict(X_data_test_final)
     
-    prediction = prod_final_clf.predict(X_data_test_final)
-    prediction
+    prediction_test = final_clf.predict(X_test)
+    
+    
+    conf_matrix_Stratified = confusion_matrix(Y_data_test, prediction_test)
+    confusion_matrix_strat = sns.heatmap(conf_matrix_Stratified, annot=True, fmt='d',cmap="viridis" )
+    # set x-axis label and ticks. 
+    confusion_matrix_strat.set_xlabel("Predicted Diagnosis")
+    confusion_matrix_strat.xaxis.set_ticklabels(['Negative', 'Positive'])
+ 
+    # set y-axis label and ticks
+    confusion_matrix_strat.set_ylabel("Actual Diagnosis")
+    confusion_matrix_strat.yaxis.set_ticklabels(['Negative', 'Positive'])
+    
+    
+    
+    conf_matrix_prod = confusion_matrix(Y_data_test_final, prediction_Prod)
+    confusion_matrix_prod =sns.heatmap(conf_matrix_prod, annot=True, fmt='d',cmap="viridis" )
+     # set x-axis label and ticks. 
+    confusion_matrix_prod.set_xlabel("Predicted Diagnosis")
+    confusion_matrix_prod.xaxis.set_ticklabels(['Negative', 'Positive'])
+ 
+    # set y-axis label and ticks
+    confusion_matrix_prod.set_ylabel("Actual Diagnosis")
+    confusion_matrix_prod.yaxis.set_ticklabels(['Negative', 'Positive'])
+    
+   
     
     #show_prediction(prod_final_clf, X_data_test_final[3],,feature_names = feature_names,show_feature_values=True)
     filename = "datasets/Not_Cleaned_data_project_38184_2024_12_24.csv"

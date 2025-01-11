@@ -266,7 +266,7 @@ def questionnaire_test():
     gender = gender_to_numerical(inquirer.prompt(Gender))
     #print(gender)
     family = confirm_to_numerical(Confirm.ask("Do you have any immediate family that has diabetes?"))
-    print(family)
+    #print(family)
     smoker = confirm_to_numerical(Confirm.ask("Do you smoke 🚬 regularly?"))
     #print(smoker)
     alcohol = confirm_to_numerical(Confirm.ask("Do you drink 🍺 alcohol regularly?"))
