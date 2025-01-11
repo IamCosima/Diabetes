@@ -1355,5 +1355,3 @@ def mydataset_RF_Prediction(filename):
 #     """
 #     Title = 'Begin test/'
 #     print(pyfiglet.figlet_format(Title))
-    
-    
