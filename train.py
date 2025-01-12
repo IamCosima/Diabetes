@@ -25,6 +25,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.base import BaseEstimator,TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
+from sklearn.tree import export_graphviz
+import graphviz
 from eli5 import show_weights
 from eli5 import show_prediction
 from sklearn.inspection import permutation_importance
@@ -278,7 +280,7 @@ def test(clf,filename):
     X_test_data_end = normalize.fit_transform(X_test_data_end)
         
     prediction_result= clf.predict(X_test_data_end)
-    print(prediction_result)
+    #print(prediction_result)
         
     feature_names_end = test_data_end.columns
     feature_names_end = feature_names_end.tolist()
@@ -542,7 +544,7 @@ def mydataset_RF():
     
     #todo create a feature dropper for the glucose-colestroral
     #,"Weight","Height"
-    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol","Waist"], axis=1, errors="ignore")
     
     
     # * looking at the headers of the dataset
@@ -730,10 +732,10 @@ def mydataset_RF():
     X_data = normalize.fit_transform(X)
     Y_data = y.to_numpy()
     #random forest set up
-    clf = RandomForestClassifier()
+    clf = RandomForestClassifier(random_state=114)
 
-    #param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-    param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
+    param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    #param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
     
     
     
@@ -786,10 +788,10 @@ def mydataset_RF():
     
     Y_data_test_final = Y_final.to_numpy()
 
-    prod_clf = RandomForestClassifier()
+    prod_clf = RandomForestClassifier(random_state=114)
 
-    #prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-    prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
+    prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    #prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
     
     prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=5,scoring="accuracy",verbose=1,return_train_score=True)
     prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
@@ -801,6 +803,17 @@ def mydataset_RF():
     feature_names = type_2_diabetes_data.columns
     feature_names = feature_names.delete(0)
     feature_names = feature_names.tolist()
+    
+    dot_data = export_graphviz(prod_final_clf.estimators_[2],
+                               feature_names=feature_names,  
+                               filled=True,  
+                               max_depth=2, 
+                               impurity=False, 
+                               proportion=True)
+    graph = graphviz.Source(dot_data)
+    graph
+    
+    
     
     #show_weights(prod_final_clf,feature_names=feature_names)
     
@@ -1065,10 +1078,11 @@ def mydataset_RF_Prediction(filename):
     
     Y_data_test_final = Y_final.to_numpy()
 
-    prod_clf = RandomForestClassifier()
+    prod_clf = RandomForestClassifier(random_state=114)
 
-    prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
-
+    #prod_param_gird = [{"n_estimators": [10,100,200,500],"max_depth": [None,5,10],"min_samples_split": [2,3,4]}]
+    prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
+    
     prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
     prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
 
