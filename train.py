@@ -21,7 +21,10 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 from joblib import dump,load
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix 
+from sklearn.metrics import confusion_matrix,ConfusionMatrixDisplay
+from sklearn.metrics import precision_score, recall_score ,f1_score
+from sklearn.metrics import roc_curve,roc_auc_score
+from sklearn.metrics import RocCurveDisplay
 from sklearn.base import BaseEstimator,TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -415,7 +418,7 @@ def mydataset_SVM():
     
     #todo create a feature dropper for the glucose-colestroral
     #,"Weight","Height"
-    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol","Waist"], axis=1, errors="ignore")
     
     #looking at the headers of the dataset
     #type_2_diabetes_data.head(5)
@@ -431,7 +434,7 @@ def mydataset_SVM():
     #sns.heatmap(type_2_diabetes_data.corr(), cmap="YlGnBu")
 
     split = StratifiedShuffleSplit(n_splits=1, test_size= 0.2)
-    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes","Family_History"]]):
+    for train_indices, test_indices in split.split(type_2_diabetes_data,type_2_diabetes_data[["Diabetes"]]):
         strat_train_set = type_2_diabetes_data.loc[train_indices]
         strat_test_set = type_2_diabetes_data.loc[test_indices]
 
@@ -447,31 +450,93 @@ def mydataset_SVM():
     y_train = strat_train_set[['Diabetes']]
     #scaler = StandardScaler()
     #X_data = scaler.fit_transform(X_train)
-    normalize = Normalizer()
-    X_data = normalize.fit_transform(X_train)
-    Y_data = y_train.to_numpy()
+    #normalize = Normalizer()
+    #X_data = normalize.fit_transform(X_train)
+    #Y_data = y_train.to_numpy()
 
     X_test = strat_test_set.drop(['Diabetes'], axis=1)
     Y_test = strat_test_set[['Diabetes']]
     #scaler = StandardScaler()
     #X_data_test = scaler.fit_transform(X_test)
-    normalize = Normalizer()
-    X_data_test = normalize.fit_transform(X_test)
-    Y_data_test = Y_test.to_numpy()
+    #normalize = Normalizer()
+    #X_data_test = normalize.fit_transform(X_test)
+    #Y_data_test = Y_test.to_numpy()
 
-    clf_Svm = svm.SVC(kernel='linear')
-    clf_Svm.fit(X_train,y_train)
-    
+    clf_Svm_test = svm.SVC(kernel='linear')
+    #clf_Svm_test.fit(X_data,Y_data.ravel())
+    clf_Svm_test.fit(X_train,y_train)
     #dump(clf_Svm,filename="clf_random_Support_Vector_model_First.joblib")
     
-    X_train_predict = clf_Svm.predict(X_train)
-    training_accuracy = accuracy_score(X_train_predict,y_train)
-    print('The accuracy of training data is: ',training_accuracy)
+    #metrics that are needed for model comparison test data
+    X_test_predict = clf_Svm_test.predict(X_test)
+    test_accuracy = accuracy_score(Y_test,X_test_predict)
+    print('The accuracy of SVM testing data is: ',test_accuracy)
+    score_precision = precision_score(Y_test,X_test_predict,average='weighted')
+    print('The precision score of SVM testing data is: ',score_precision)
+    score_recall = recall_score(Y_test,X_test_predict,average='weighted')
+    print('The recall score of SVM testing data is: ',score_recall)
+    score_F1 = f1_score(Y_test,X_test_predict,average='weighted')
+    print('The f1 score of SVM testing data is: ',score_F1)
+    
+    svm_auc_test = roc_auc_score(Y_test,X_test_predict)
+    print('SVM Auroc Test Data = ',svm_auc_test)
+    
+    t_fpr, t_tpr ,t_thresholds = roc_curve(Y_test,X_test_predict)
+    display = RocCurveDisplay(fpr=t_fpr, tpr=t_tpr, roc_auc=svm_auc_test,estimator_name=clf_Svm_test)
+    display.plot()
+    plt.title("SVM Rok Curve Test Data")
+    plt.show
+    
+    #confusion matrix 
+    conf_matrix_test = confusion_matrix(Y_test, X_test_predict)
+    ConfusionMatrixDisplay(confusion_matrix=conf_matrix_test).plot()
+    
+    final_data = type_2_diabetes_data
+    
+    X_final = final_data.drop(['Diabetes'], axis=1)
+    Y_final = final_data[['Diabetes']]
+    #scaler = StandardScaler()
+    #X_data_test_final = scaler.fit_transform(X_final)
+    #normalize = Normalizer()
+    #X_data_test_final = normalize.fit_transform(X_final)
+    #Y_data_test_final = Y_final.to_numpy()
+    
+    feature_names = type_2_diabetes_data.columns
+    feature_names = feature_names.delete(0)
+    feature_names = feature_names.tolist()
     
     
-    X_test_predict = clf_Svm.predict(X_test)
-    test_accuracy = accuracy_score(X_test_predict,Y_test)
-    print('The accuracy of testing data is: ',test_accuracy)
+    clf_Svm = svm.SVC(kernel='linear',verbose=True)
+    clf_Svm.fit(X_final,Y_final)
+    #clf_Svm.fit(X_final,Y_data_test_final.ravel())
+    
+    #metrics that are needed for model comparison Full data
+    X_prod_predict = clf_Svm.predict(X_final)
+    test_accuracy = accuracy_score(Y_final,X_prod_predict)
+    print('The accuracy of SVM Full data is: ',test_accuracy)
+    score_precision = precision_score(Y_final,X_prod_predict,average='weighted')
+    print('The precision score of SVM Full data is: ',score_precision)
+    score_recall = recall_score(Y_final,X_prod_predict,average='weighted')
+    print('The recall score of SVM Full data is: ',score_recall)
+    score_F1 = f1_score(Y_final,X_prod_predict,average='weighted')
+    print('The f1 score of SVM Full data is: ',score_F1)
+    
+    svm_auc = roc_auc_score(Y_final,X_prod_predict)
+    print('SVM Auroc Full Data = ',svm_auc)
+    
+    fpr, tpr ,thresholds = roc_curve(Y_final,X_prod_predict)
+    display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=svm_auc,estimator_name=clf_Svm)
+    display.plot()
+    plt.title("SVM Rok Curve Full Data")
+    plt.show
+    
+    
+    #confusion matrix 
+    conf_matrix_prod = confusion_matrix(Y_final, X_prod_predict)
+    ConfusionMatrixDisplay(confusion_matrix=conf_matrix_prod).plot()
+    
+
+    #show_weights(clf_Svm,feature_names=feature_names)
     
     filename = "datasets/Not_Cleaned_data_project_38184_2024_12_24.csv"
     test(clf_Svm,filename)
@@ -521,6 +586,11 @@ def mydataset_RF():
     #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].apply(calc_blood_pressure)
     
     #type_2_diabetes_data['Blood_Pressure'] = type_2_diabetes_data['Blood_Pressure'].astype(int)
+    
+    height = sns.displot(data=type_2_diabetes_data, x='Height',bins = 20,binwidth=10,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    height.set(title = "Distribution of Height",xmargin=0)
+    
+    
     
     # todo adding the missing values to dataset
     #pipeline for adding the missing values
@@ -624,11 +694,26 @@ def mydataset_RF():
     birth = sns.displot(data=type_2_diabetes_data, x='Birthdate',bins = 20,binwidth=10,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
     birth.set(title = "Distribution of Age",xmargin=0)
     
-    gender = sns.displot(data=type_2_diabetes_data, x='Gender',bins = 2,binwidth = 0.6,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
-    gender.set(title = "Distribution of Gender",xmargin=0.1 ,xlim =(0,2), xticks=(0,2))
+    plt.figure()
+    label = ['Male','Female','Other']
+    gender_counts = type_2_diabetes_data['Gender'].value_counts(dropna=False)
+    plt.title('Distribution of Gender')
+    plt.pie(gender_counts, labels=label,autopct='%.0f%%',colors=sns.color_palette("pastel", 8),) 
+    plt.show()
     
-    Family_History = sns.displot(data=type_2_diabetes_data, x='Family_History',bins = 2,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
-    Family_History.set(title = "Distribution of Family_History",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
+    #gender = sns.displot(data=type_2_diabetes_data, x='Gender',bins = 2,binwidth = 0.6,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    #gender.set(title = "Distribution of Gender",xmargin=0.1 ,xlim =(0,2), xticks=(0,2))
+    
+    plt.figure()
+    label = ['Yes','No']
+    Family_History_counts = type_2_diabetes_data['Family_History'].value_counts(dropna=False)
+    plt.title('Distribution of Family History of Type 2 Diabetes')
+    plt.pie(Family_History_counts, labels=label,autopct='%.0f%%',colors=sns.color_palette("pastel", 8),) 
+    plt.show()
+    
+
+    #Family_History = sns.displot(data=type_2_diabetes_data, x='Family_History',bins = 2,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
+    #Family_History.set(title = "Distribution of Family_History",xmargin=0.1 ,xlim =(0,1), xticks=(0,1))
     
     Fruit = sns.displot(data=type_2_diabetes_data, x='Fruit',bins = 5,color="#cff7d2",edgecolor='#295b3e',linewidth = 1) 
     Fruit.set(title = "Distribution of Fruit Consumption",xmargin=0.1 ,xlim =(0,4), xticks=(0,4))
@@ -738,10 +823,9 @@ def mydataset_RF():
     #param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
     
     
-    
     grid_search = GridSearchCV(clf,param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
-    grid_search.fit(X_data,Y_data.ravel())
-
+    #grid_search.fit(X_data,Y_data.ravel())
+    grid_search.fit(X,y)
 
     #display the CLF
 
@@ -758,13 +842,38 @@ def mydataset_RF():
     Y_data_test = Y_test.to_numpy()
 
     # * test the score of the model
-    final_clf.score(X_data_test,Y_data_test)
-    
+    #final_clf.score(X_data_test,Y_data_test)
+    final_clf.score(X_test,Y_test)
     feature_names = type_2_diabetes_data.columns
     feature_names = feature_names.delete(0)
     feature_names = feature_names.tolist()
+    
+    #metrics that are needed for model comparison test data
+    X_test_predict = final_clf.predict(X_test)
+    test_accuracy = accuracy_score(Y_test,X_test_predict)
+    print('The accuracy of Random Forest testing data is: ',test_accuracy)
+    score_precision = precision_score(Y_test,X_test_predict,average='weighted')
+    print('The precision score of Random Forest testing data is: ',score_precision)
+    score_recall = recall_score(Y_test,X_test_predict,average='weighted')
+    print('The recall score of Random Forest testing data is: ',score_recall)
+    score_F1 = f1_score(Y_test,X_test_predict,average='weighted')
+    print('The f1 score of Random Forest testing data is: ',score_F1)
+    
+    #confusion matrix 
+    conf_matrix_Stratified = confusion_matrix(Y_test, X_test_predict)
+    ConfusionMatrixDisplay(confusion_matrix=conf_matrix_Stratified).plot()
+    
+    rf_auc_test = roc_auc_score(Y_test,X_test_predict)
+    print('RF Auroc Test Data = ',rf_auc_test)
+    
+    t_fpr, t_tpr ,t_thresholds = roc_curve(Y_test,X_test_predict)
+    display = RocCurveDisplay(fpr=t_fpr, tpr=t_tpr, roc_auc=rf_auc_test,estimator_name=final_clf)
+    display.plot()
+    plt.title("Random Forest Rok Curve Test Data")
+    plt.show
+    
     #* Weights of the model
-    show_weights(final_clf,feature_names=feature_names)
+    #show_weights(final_clf,feature_names=feature_names)
     
 
     #exporting file
@@ -794,16 +903,15 @@ def mydataset_RF():
     #prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
     
     prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=5,scoring="accuracy",verbose=1,return_train_score=True)
-    prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
-
+    #prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
+    prod_grid_search.fit(X_final,Y_final)
+    
     prod_final_clf = prod_grid_search.best_estimator_
     # * test the score of the model
-    prod_final_clf.score(X_data_test_final,Y_data_test_final)
-
-    feature_names = type_2_diabetes_data.columns
-    feature_names = feature_names.delete(0)
-    feature_names = feature_names.tolist()
+    #prod_final_clf.score(X_data_test_final,Y_data_test_final)
+    prod_final_clf.score(X_final,Y_final)
     
+    #graph visulisation of random forest model
     dot_data = export_graphviz(prod_final_clf.estimators_[2],
                                feature_names=feature_names,  
                                filled=True,  
@@ -813,43 +921,47 @@ def mydataset_RF():
     graph = graphviz.Source(dot_data)
     graph
     
+    #metrics that are needed for model comparison Full data
+    X_prod_predict = prod_final_clf.predict(X_final)
+    test_accuracy = accuracy_score(Y_final,X_prod_predict)
+    print('The accuracy of Random Forest Full data is: ',test_accuracy)
+    score_precision = precision_score(Y_final,X_prod_predict,average='weighted')
+    print('The precision score of Random Forest Full data is: ',score_precision)
+    score_recall = recall_score(Y_final,X_prod_predict,average='weighted')
+    print('The recall score of Random Forest Full data is: ',score_recall)
+    score_F1 = f1_score(Y_final,X_prod_predict,average='weighted')
+    print('The f1 score of Random Forest Full data is: ',score_F1)
     
     
+    # #metrics that are needed for model comparison test data
+    # X_test_predict = final_clf.predict(X_data_test)
+    # test_accuracy = accuracy_score(Y_data_test,X_test_predict)
+    # print('The accuracy of Random Forest testing data is: ',test_accuracy)
+    # score_precision = precision_score(Y_data_test,X_test_predict,average='weighted')
+    # print('The precision score of Random Forest testing data is: ',score_precision)
+    # score_recall = recall_score(Y_data_test,X_test_predict,average='weighted')
+    # print('The recall score of Random Forest testing data is: ',score_recall)
+    # score_F1 = f1_score(Y_data_test,X_test_predict,average='weighted')
+    # print('The f1 score of Random Forest testing data is: ',score_F1)
+    
+    
+    
+    rf_auc = roc_auc_score(Y_final,X_prod_predict)
+    print('RF Auroc Full Data = ',rf_auc)
+    
+    fpr, tpr ,thresholds = roc_curve(Y_final,X_prod_predict)
+    display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=rf_auc,estimator_name=prod_final_clf)
+    display.plot()
+    plt.title("Random Forest Rok Curve Full Data")
+    plt.show
+     
     #show_weights(prod_final_clf,feature_names=feature_names)
     
-    #Fix = final_data.drop(['Diabetes'],axis=1)
-    #fixing = scaler.fit_transform(Fix)
-    #prediction = prod_final_clf.predict(fixing)
-   
-    prediction_Prod = prod_final_clf.predict(X_data_test_final)
-    
-    prediction_test = final_clf.predict(X_test)
-    
-    
-    conf_matrix_Stratified = confusion_matrix(Y_data_test, prediction_test)
-    confusion_matrix_strat = sns.heatmap(conf_matrix_Stratified, annot=True, fmt='d',cmap="viridis" )
-    # set x-axis label and ticks. 
-    confusion_matrix_strat.set_xlabel("Predicted Diagnosis")
-    confusion_matrix_strat.xaxis.set_ticklabels(['Negative', 'Positive'])
- 
-    # set y-axis label and ticks
-    confusion_matrix_strat.set_ylabel("Actual Diagnosis")
-    confusion_matrix_strat.yaxis.set_ticklabels(['Negative', 'Positive'])
-    
-    
-    
-    conf_matrix_prod = confusion_matrix(Y_data_test_final, prediction_Prod)
-    confusion_matrix_prod =sns.heatmap(conf_matrix_prod, annot=True, fmt='d',cmap="viridis" )
-     # set x-axis label and ticks. 
-    confusion_matrix_prod.set_xlabel("Predicted Diagnosis")
-    confusion_matrix_prod.xaxis.set_ticklabels(['Negative', 'Positive'])
- 
-    # set y-axis label and ticks
-    confusion_matrix_prod.set_ylabel("Actual Diagnosis")
-    confusion_matrix_prod.yaxis.set_ticklabels(['Negative', 'Positive'])
+   #confusion matrix 
+    conf_matrix_prod = confusion_matrix(Y_data_test_final, X_prod_predict)
+    ConfusionMatrixDisplay(confusion_matrix=conf_matrix_prod).plot()
     
    
-    
     #show_prediction(prod_final_clf, X_data_test_final[3],,feature_names = feature_names,show_feature_values=True)
     filename = "datasets/Not_Cleaned_data_project_38184_2024_12_24.csv"
     test(prod_final_clf,filename)
@@ -924,7 +1036,7 @@ def mydataset_SVM_Prediction(filename):
     
     #todo create a feature dropper for the glucose-colestroral
     #,"Weight","Height"
-    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol"], axis=1, errors="ignore")
+    type_2_diabetes_data = type_2_diabetes_data.drop(["Glucose","Blood_Pressure","Cholesterol","Weight","Height","Dietry_Habits","Smoking","Alcohol","Waist"], axis=1, errors="ignore")
     
     final_data = type_2_diabetes_data
 
@@ -932,9 +1044,9 @@ def mydataset_SVM_Prediction(filename):
     Y_final = final_data[['Diabetes']]
     #scaler = StandardScaler()
     #X_data_test_final = scaler.fit_transform(X_final)
-    normalize = Normalizer()
-    X_data_test_final = normalize.fit_transform(X_final)
-    Y_data_test_final = Y_final.to_numpy()
+    #normalize = Normalizer()
+    #X_data_test_final = normalize.fit_transform(X_final)
+    #Y_data_test_final = Y_final.to_numpy()
     
     feature_names = type_2_diabetes_data.columns
     feature_names = feature_names.delete(0)
@@ -942,14 +1054,14 @@ def mydataset_SVM_Prediction(filename):
     
     
     clf_Svm = svm.SVC(kernel='linear',verbose=True)
-    clf_Svm.fit(X_data_test_final,Y_data_test_final.ravel())
+    clf_Svm.fit(X_final,Y_final)
     
    
     #show_weights(clf_Svm,feature_names=feature_names)
     
-    clf = clf_Svm
-    prediction = clf.predict(X_data_test_final)
-    prediction    
+    #clf = clf_Svm
+    #prediction = clf.predict(X_final)
+    #prediction    
     #prediction_weight = show_prediction(clf_Svm,X_data_test_final[3],feature_names = feature_names_end,show_feature_values=True)
         
     
@@ -1084,7 +1196,7 @@ def mydataset_RF_Prediction(filename):
     prod_param_gird = [{ "n_estimators": [50, 100, 150], "max_depth": [None, 10, 20],"min_samples_split": [2, 5, 10],"min_samples_leaf": [1, 2, 4],"max_features": ['sqrt', 'log2', None]}]
     
     prod_grid_search = GridSearchCV(prod_clf,prod_param_gird,cv=3,scoring="accuracy",verbose=1,return_train_score=True)
-    prod_grid_search.fit(X_data_test_final,Y_data_test_final.ravel())
+    prod_grid_search.fit(X_final,Y_final)
 
     prod_final_clf = prod_grid_search.best_estimator_
     # * test the score of the model
