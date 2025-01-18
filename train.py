@@ -444,6 +444,7 @@ def mydataset_SVM():
     strat_train_set
 
     strat_train_set.info()
+    strat_test_set.info()
 
 
     X_train = strat_train_set.drop(['Diabetes'], axis=1)
