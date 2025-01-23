@@ -619,7 +619,7 @@ def mydataset_RF():
     
     
     # * looking at the headers of the dataset
-    #type_2_diabetes_data.head(90)
+    #type_2_diabetes_data.head(5)
 
     # * looking at all the statistical data from the dataset
     #type_2_diabetes_data.describe()
