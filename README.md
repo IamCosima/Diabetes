@@ -2,8 +2,8 @@
 ## A Machine Learning Type 2 Diabetes Predictor
 
 ### About this Project 
-DiaPredic is a simple to use CLI Machine Learning Type 2 Diabetes Predictor for use in medical facilities. It allows for quick and accurate predictions.
-*Disclaimer this is not a medical diagnosis Please Consult Your Doctor to verify any abnormalities
+DiaPredic is a simple to use CLI Machine Learning Type 2 Diabetes Predictor for use in medical facilities. It allows for quick and accurate predictions. <br/> 
+*Disclaimer this is not a medical diagnosis Please Consult Your Doctor to verify any abnormalities. The creator takes no responsibility or liability for any persons harmed in anyway by the use of this program. USE AT OWN RISK
 
 ## Getting Started
 ### Prerequisites
