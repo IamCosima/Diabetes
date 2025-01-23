@@ -27,10 +27,11 @@ DiaPredic is a simple to use CLI Machine Learning Type 2 Diabetes Predictor for 
 
 
 ## Online Questionnaire Page Tivian
-Link to online questionnaire for initial data collection [Questionnaire link](https://uc2456.customervoice360.com/uc/ype-2-Diabetes-Risk-Assesment-Data-Collection/).
-![QR code of Tivian questionnaire](/assets/images/qr.png)
+Link to online questionnaire for initial data collection [Questionnaire link](https://uc2456.customervoice360.com/uc/ype-2-Diabetes-Risk-Assesment-Data-Collection/). <br/>
+
+![QR code of Tivian questionnaire](/assets/images/qr.png)<br/>
 
 ## Example Usage of the Project
-![Screenshot of Filled in Questionnaire](/assets/images/Questionnaire filled.png)
+![Screenshot of Filled in Questionnaire](/assets/images/Questionnaire%20filled.png)
 ![Screenshot of High Risk result from Questionnaire](/assets/images/High%20Risk%20result.png)
 ![Screenshot of Low Risk result from Questionnaire](/assets/images/Low%20Risk%20Result.png)
